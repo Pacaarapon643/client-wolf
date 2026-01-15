@@ -1,38 +1,36 @@
 import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import './Navbar.css'
 
 interface NavbarProps {
     isLoggedIn?: boolean
     username?: string
-    onLogin?: () => void
     onLogout?: () => void
-    onRegister?: () => void
 }
 
 const Navbar = ({
     isLoggedIn = false,
     username = '',
-    onLogin,
-    onLogout,
-    onRegister
+    onLogout
 }: NavbarProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const navigate = useNavigate()
+
+    const handleLogout = () => {
+        onLogout?.()
+        navigate('/')
+    }
 
     return (
         <nav className="navbar">
             <div className="navbar-container">
                 {/* Logo */}
-                <div className="navbar-logo">
+                <Link to="/" className="navbar-logo">
                     <span className="logo-icon">🐺</span>
                     <span className="logo-text">Werewolf</span>
-                </div>
+                </Link>
 
-                {/* Desktop Navigation */}
-                <div className="navbar-nav">
-                    <a href="#" className="nav-link">หน้าแรก</a>
-                    <a href="#" className="nav-link">วิธีเล่น</a>
-                    <a href="#" className="nav-link">ลีดเดอร์บอร์ด</a>
-                </div>
+
 
                 {/* Auth Section */}
                 <div className="navbar-auth">
@@ -42,18 +40,18 @@ const Navbar = ({
                                 {username.charAt(0).toUpperCase()}
                             </div>
                             <span className="user-name">{username}</span>
-                            <button className="auth-btn logout-btn" onClick={onLogout}>
+                            <button className="auth-btn logout-btn" onClick={handleLogout}>
                                 ออกจากระบบ
                             </button>
                         </div>
                     ) : (
                         <div className="auth-buttons">
-                            <button className="auth-btn login-btn" onClick={onLogin}>
+                            <Link to="/login" className="auth-btn login-btn">
                                 เข้าสู่ระบบ
-                            </button>
-                            <button className="auth-btn register-btn" onClick={onRegister}>
+                            </Link>
+                            <Link to="/register" className="auth-btn register-btn">
                                 สมัครสมาชิก
-                            </button>
+                            </Link>
                         </div>
                     )}
                 </div>
@@ -71,9 +69,6 @@ const Navbar = ({
 
             {/* Mobile Menu */}
             <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
-                <a href="#" className="mobile-nav-link">หน้าแรก</a>
-                <a href="#" className="mobile-nav-link">วิธีเล่น</a>
-                <a href="#" className="mobile-nav-link">ลีดเดอร์บอร์ด</a>
                 <div className="mobile-auth">
                     {isLoggedIn ? (
                         <>
@@ -83,18 +78,18 @@ const Navbar = ({
                                 </div>
                                 <span>{username}</span>
                             </div>
-                            <button className="auth-btn logout-btn" onClick={onLogout}>
+                            <button className="auth-btn logout-btn" onClick={handleLogout}>
                                 ออกจากระบบ
                             </button>
                         </>
                     ) : (
                         <>
-                            <button className="auth-btn login-btn" onClick={onLogin}>
+                            <Link to="/login" className="auth-btn login-btn" onClick={() => setIsMenuOpen(false)}>
                                 เข้าสู่ระบบ
-                            </button>
-                            <button className="auth-btn register-btn" onClick={onRegister}>
+                            </Link>
+                            <Link to="/register" className="auth-btn register-btn" onClick={() => setIsMenuOpen(false)}>
                                 สมัครสมาชิก
-                            </button>
+                            </Link>
                         </>
                     )}
                 </div>
