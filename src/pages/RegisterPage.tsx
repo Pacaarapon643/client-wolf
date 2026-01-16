@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { authApi, ApiError } from '../services/api'
+import Modal from '../components/Modal'
+import type { ModalType } from '../components/Modal'
 import './RegisterPage.css'
 
 interface RegisterFormData {
@@ -10,6 +13,7 @@ interface RegisterFormData {
 }
 
 const RegisterPage = () => {
+    const navigate = useNavigate()
     const [formData, setFormData] = useState<RegisterFormData>({
         username: '',
         email: '',
@@ -18,6 +22,17 @@ const RegisterPage = () => {
     })
     const [errors, setErrors] = useState<Partial<RegisterFormData>>({})
     const [isLoading, setIsLoading] = useState(false)
+
+    // Modal state
+    const [modalState, setModalState] = useState<{
+        isOpen: boolean
+        type: ModalType
+        message: string
+    }>({
+        isOpen: false,
+        type: 'info',
+        message: ''
+    })
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -74,12 +89,49 @@ const RegisterPage = () => {
 
         setIsLoading(true)
 
-        // Simulate API call
-        setTimeout(() => {
-            console.log('Register with:', formData)
-            alert('สมัครสมาชิกสำเร็จ!')
+        try {
+            // Call register API
+            const response = await authApi.register({
+                email: formData.email,
+                user_name: formData.username,
+                password: formData.password
+            })
+
+            console.log('Register success:', response)
+
+            // Show success modal
+            setModalState({
+                isOpen: true,
+                type: 'success',
+                message: `สมัครสมาชิกสำเร็จ!\nยินดีต้อนรับ`
+            })
+
+            // Clear form
+            setFormData({
+                username: '',
+                email: '',
+                password: '',
+                confirmPassword: ''
+            })
+        } catch (error) {
+            console.error('Register error:', error)
+
+            if (error instanceof ApiError) {
+                setModalState({
+                    isOpen: true,
+                    type: 'error',
+                    message: error.message
+                })
+            } else {
+                setModalState({
+                    isOpen: true,
+                    type: 'error',
+                    message: 'เกิดข้อผิดพลาดในการสมัครสมาชิก กรุณาลองอีกครั้ง'
+                })
+            }
+        } finally {
             setIsLoading(false)
-        }, 1500)
+        }
     }
 
     return (
@@ -198,6 +250,20 @@ const RegisterPage = () => {
                     <p>มีบัญชีอยู่แล้ว? <Link to="/login" className="footer-link">เข้าสู่ระบบ</Link></p>
                 </div>
             </div>
+
+            {/* Modal */}
+            <Modal
+                isOpen={modalState.isOpen}
+                type={modalState.type}
+                message={modalState.message}
+                onClose={() => {
+                    setModalState({ ...modalState, isOpen: false })
+                    // Navigate to login after success
+                    if (modalState.type === 'success') {
+                        setTimeout(() => navigate('/login'), 300)
+                    }
+                }}
+            />
         </div>
     )
 }
