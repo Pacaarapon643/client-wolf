@@ -1,23 +1,15 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 import './Navbar.css'
 
-interface NavbarProps {
-    isLoggedIn?: boolean
-    username?: string
-    onLogout?: () => void
-}
-
-const Navbar = ({
-    isLoggedIn = false,
-    username = '',
-    onLogout
-}: NavbarProps) => {
+const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const navigate = useNavigate()
+    const { user, isAuthenticated, logout } = useAuth()
 
     const handleLogout = () => {
-        onLogout?.()
+        logout()
         navigate('/')
     }
 
@@ -34,12 +26,12 @@ const Navbar = ({
 
                 {/* Auth Section */}
                 <div className="navbar-auth">
-                    {isLoggedIn ? (
+                    {isAuthenticated ? (
                         <div className="user-section">
                             <div className="user-avatar">
-                                {username.charAt(0).toUpperCase()}
+                                {user?.username.charAt(0).toUpperCase()}
                             </div>
-                            <span className="user-name">{username}</span>
+                            <span className="user-name">{user?.username}</span>
                             <button className="auth-btn logout-btn" onClick={handleLogout}>
                                 ออกจากระบบ
                             </button>
@@ -70,13 +62,13 @@ const Navbar = ({
             {/* Mobile Menu */}
             <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-auth">
-                    {isLoggedIn ? (
+                    {isAuthenticated ? (
                         <>
                             <div className="mobile-user-info">
                                 <div className="user-avatar">
-                                    {username.charAt(0).toUpperCase()}
+                                    {user?.username.charAt(0).toUpperCase()}
                                 </div>
-                                <span>{username}</span>
+                                <span>{user?.username}</span>
                             </div>
                             <button className="auth-btn logout-btn" onClick={handleLogout}>
                                 ออกจากระบบ

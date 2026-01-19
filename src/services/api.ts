@@ -48,8 +48,6 @@ export const authApi = {
             console.log(response);
             console.log(result);
 
-
-
             if (!response.ok) {
                 // Construct error message from response
                 let errorMessage = 'Registration failed'
@@ -82,7 +80,7 @@ export const authApi = {
         }
     },
 
-    async login(email: string, password: string): Promise<any> {
+    async login(email: string, password: string): Promise<ApiResponse<any>> {
         try {
             const response = await fetch(`${API_BASE_URL}/api/v1/auths/login`, {
                 method: 'POST',
@@ -93,6 +91,8 @@ export const authApi = {
             })
 
             const result = await response.json()
+            console.log(response);
+            console.log(result);
 
             if (!response.ok) {
                 // Construct error message from response

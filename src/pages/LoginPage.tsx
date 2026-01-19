@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { authApi, ApiError } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
+import Modal from '../components/Modal'
+import type { ModalType } from '../components/Modal'
 import './LoginPage.css'
 
 interface LoginFormData {
@@ -8,6 +12,8 @@ interface LoginFormData {
 }
 
 const LoginPage = () => {
+    const navigate = useNavigate()
+    const { login } = useAuth()
     const [formData, setFormData] = useState<LoginFormData>({
         email: '',
         password: ''
@@ -15,6 +21,17 @@ const LoginPage = () => {
     const [errors, setErrors] = useState<Partial<LoginFormData>>({})
     const [isLoading, setIsLoading] = useState(false)
     const [rememberMe, setRememberMe] = useState(false)
+
+    // Modal state
+    const [modalState, setModalState] = useState<{
+        isOpen: boolean
+        type: ModalType
+        message: string
+    }>({
+        isOpen: false,
+        type: 'info',
+        message: ''
+    })
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -59,12 +76,42 @@ const LoginPage = () => {
 
         setIsLoading(true)
 
-        // Simulate API call
-        setTimeout(() => {
-            console.log('Login with:', formData, 'Remember:', rememberMe)
-            alert('เข้าสู่ระบบสำเร็จ!')
+        try {
+            // Call login API
+            const response = await authApi.login(formData.email, formData.password)
+
+            console.log('Login success:', response)
+
+            // Save user data to context
+            if (response.data) {
+                login({
+                    id: response.data.id || '',
+                    username: response.data.user_name || response.data.username || '',
+                    email: response.data.email || formData.email
+                })
+
+                // Navigate to character selection
+                navigate('/select-character')
+            }
+        } catch (error) {
+            console.error('Login error:', error)
+
+            if (error instanceof ApiError) {
+                setModalState({
+                    isOpen: true,
+                    type: 'error',
+                    message: error.message
+                })
+            } else {
+                setModalState({
+                    isOpen: true,
+                    type: 'error',
+                    message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองอีกครั้ง'
+                })
+            }
+        } finally {
             setIsLoading(false)
-        }, 1500)
+        }
     }
 
     return (
@@ -169,6 +216,14 @@ const LoginPage = () => {
                     <p>ยังไม่มีบัญชี? <Link to="/register" className="footer-link">สมัครสมาชิก</Link></p>
                 </div>
             </div>
+
+            {/* Modal */}
+            <Modal
+                isOpen={modalState.isOpen}
+                type={modalState.type}
+                message={modalState.message}
+                onClose={() => setModalState({ ...modalState, isOpen: false })}
+            />
         </div>
     )
 }
