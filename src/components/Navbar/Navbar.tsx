@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import './Navbar.css'
+import { useNavigate } from 'react-router'
+
+
 
 interface NavbarProps {
     isLoggedIn?: boolean
@@ -17,6 +20,7 @@ const Navbar = ({
     onRegister
 }: NavbarProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const navigate = useNavigate()
 
     return (
         <nav className="navbar">
@@ -51,8 +55,8 @@ const Navbar = ({
                             <button className="auth-btn login-btn" onClick={onLogin}>
                                 เข้าสู่ระบบ
                             </button>
-                            <button className="auth-btn register-btn" onClick={onRegister}>
-                                สมัครสมาชิก
+                            <button className="auth-btn register-btn" onClick={() => navigate('/register')}>
+                                สมัครสมาชิก   
                             </button>
                         </div>
                     )}
