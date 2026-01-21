@@ -1,16 +1,27 @@
-import type { RegisterInput } from "../schemas/auth";
-import axios from "axios";
+import type { LoginInput, RegisterInput } from "../schemas/auth";
+import api from './axios';
 
-const API_BAEE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const registerUser = async (data: RegisterInput) => {
+export const RegisterUser = async (data: RegisterInput) => {
     try {
-        const response = await axios.post(`${API_BAEE_URL}/auths/register`,
+        const response = await  api.post(`/auths/register`,
             data
         )
         return response.data;
     } catch (error: any) {
         const backendError = error.response?.data;
         throw new Error(backendError?.error || backendError?.message || "เกิดข้อผิดพลาด");
+    }
+}
+
+export const LoginUser = async (data: LoginInput) => {
+    try {
+        const response = await api.post(`/auths/login`,
+            data
+        )
+        return response.data;
+    } catch (error: any) {
+        const backendError = error.response?.data;
+        throw new Error(backendError?.error || backendError?.message || "เข้าสู่ระบบไม่สำเร็จ");
     }
 }

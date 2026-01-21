@@ -18,3 +18,13 @@ export const registerSchema = z.object({
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+
+export const LoginSchema = z.object({
+    email: z.email({
+        message: "รูปแบบอีเมล์ไม่ถูกต้อง"
+    }),
+    password: z.string()
+        .min(1, { message: "กรุณากรอกรหัสผ่าน" })
+})
+
+export type LoginInput = z.infer<typeof LoginSchema>;

@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterInput } from '../schemas/auth';
 import { useNavigate } from 'react-router';
-import { registerUser } from '../api/auth';
+import { RegisterUser } from '../api/auth';
 
 const RegisterPage = () => {
     const {
@@ -17,10 +17,10 @@ const RegisterPage = () => {
 
     const onSubmit = async (data: RegisterInput) => {
         try {
-            const response = await registerUser(data);
+            const response = await RegisterUser(data);
             console.log(response);
             alert("สมัครสมาชิกสำเร็จ! 🐺");
-            navigate('/');
+            navigate('/login');
         } catch (err: any) {
             console.log(err.message);
             alert(err.message);

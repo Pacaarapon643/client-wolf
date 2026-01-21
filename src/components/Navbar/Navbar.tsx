@@ -52,7 +52,7 @@ const Navbar = ({
                         </div>
                     ) : (
                         <div className="auth-buttons">
-                            <button className="auth-btn login-btn" onClick={onLogin}>
+                            <button className="auth-btn login-btn" onClick={() => navigate('/login')}>
                                 เข้าสู่ระบบ
                             </button>
                             <button className="auth-btn register-btn" onClick={() => navigate('/register')}>

@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router"
 import HomePage from "./pages/HomePage"
 import RegisterPage from "./pages/RegisterPage"
+import LoginPage from "./pages/LoginPage"
 import Navbar from "./components/Navbar"
 
 // Layout component with Navbar
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
             {
                 path: "register",
                 element: <RegisterPage />,
+            },
+            {
+                path: "login",
+                element: <LoginPage />,
             },
         ],
     },
