@@ -26,17 +26,17 @@ const Navbar = ({
         <nav className="navbar">
             <div className="navbar-container">
                 {/* Logo */}
-                <div className="navbar-logo">
+                <div className="navbar-logo " onClick={() => navigate('')}>
                     <span className="logo-icon">🐺</span>
                     <span className="logo-text">Werewolf</span>
                 </div>
 
                 {/* Desktop Navigation */}
-                <div className="navbar-nav">
+                {/* <div className="navbar-nav">
                     <a href="#" className="nav-link">หน้าแรก</a>
                     <a href="#" className="nav-link">วิธีเล่น</a>
                     <a href="#" className="nav-link">ลีดเดอร์บอร์ด</a>
-                </div>
+                </div> */}
 
                 {/* Auth Section */}
                 <div className="navbar-auth">
@@ -56,7 +56,7 @@ const Navbar = ({
                                 เข้าสู่ระบบ
                             </button>
                             <button className="auth-btn register-btn" onClick={() => navigate('/register')}>
-                                สมัครสมาชิก   
+                                สมัครสมาชิก
                             </button>
                         </div>
                     )}
@@ -75,9 +75,9 @@ const Navbar = ({
 
             {/* Mobile Menu */}
             <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
-                <a href="#" className="mobile-nav-link">หน้าแรก</a>
+                {/* <a href="#" className="mobile-nav-link">หน้าแรก</a>
                 <a href="#" className="mobile-nav-link">วิธีเล่น</a>
-                <a href="#" className="mobile-nav-link">ลีดเดอร์บอร์ด</a>
+                <a href="#" className="mobile-nav-link">ลีดเดอร์บอร์ด</a> */}
                 <div className="mobile-auth">
                     {isLoggedIn ? (
                         <>

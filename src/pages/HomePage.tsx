@@ -38,7 +38,7 @@ const HomePage = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col gap-4 max-w-xs mx-auto">
+                {/* <div className="flex flex-col gap-4 max-w-xs mx-auto">
                     <button className="relative flex items-center justify-center gap-3 px-8 py-4 border-none rounded-xl text-lg font-semibold cursor-pointer transition-all duration-300 overflow-hidden bg-gradient-to-br from-indigo-600 to-wolf-600 text-white shadow-[0_4px_20px_rgba(99,102,241,0.4)] hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(99,102,241,0.6)] group animate-slide-up">
                         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500"></span>
                         <span className="text-2xl">🎮</span>
@@ -56,12 +56,12 @@ const HomePage = () => {
                         <span className="text-2xl">📖</span>
                         <span>วิธีเล่น</span>
                     </button>
-                </div>
+                </div> */}
 
                 {/* Footer */}
-                <div className="mt-12 text-gray-600 text-sm animate-slide-up">
+                {/* <div className="mt-12 text-gray-600 text-sm animate-slide-up">
                     <p>🐺 Werewolf Online v1.0</p>
-                </div>
+                </div> */}
             </div>
         </div>
     )
