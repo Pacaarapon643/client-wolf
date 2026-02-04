@@ -1,4 +1,15 @@
+import { useNavigate } from "react-router";
+import { useAuth } from "../context/AuthContext"
+import { motion } from "framer-motion";
+
 const HomePage = () => {
+    const { isLoggedIn } = useAuth();
+    const navigate = useNavigate();
+
+    const lobby = () => {
+        navigate("/lobby");
+    };
+
     return (
         <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-dark-900 via-dark-800 to-dark-700 relative overflow-hidden font-sans">
             {/* Background Glow Effect */}
@@ -35,6 +46,29 @@ const HomePage = () => {
                     <p className="text-xl text-gray-500 mt-2 tracking-[0.2em] animate-floating">
                         หมาป่าล่าชาวบ้าน
                     </p>
+
+                    {isLoggedIn && (
+                        <div className="w-full max-w-xs mx-auto flex justify-center items-center">
+                            <motion.button
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 10
+                                }}
+                                onClick={lobby}
+                                className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 rounded-xl text-white font-bold shadow-lg shadow-purple-500/20 mt-12"
+                            >
+                                🎮 เริ่มเกม
+                            </motion.button>
+                        </div>
+
+
+                    )}
+
                 </div>
 
                 {/* Action Buttons */}

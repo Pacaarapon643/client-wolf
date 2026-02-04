@@ -1,10 +1,11 @@
 import type { LoginInput, RegisterInput } from "../schemas/auth";
+import type { GetAuthResponse } from "../types/auth";
 import api from './axios';
 
 
 export const RegisterUser = async (data: RegisterInput) => {
     try {
-        const response = await  api.post(`/auths/register`,
+        const response = await api.post(`/auths/register`,
             data
         )
         return response.data;
@@ -14,11 +15,13 @@ export const RegisterUser = async (data: RegisterInput) => {
     }
 }
 
-export const LoginUser = async (data: LoginInput) => {
+export const LoginUser = async (data: LoginInput): Promise<GetAuthResponse> => {
     try {
         const response = await api.post(`/auths/login`,
             data
         )
+        console.log(response);
+
         return response.data;
     } catch (error: any) {
         const backendError = error.response?.data;

@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterInput } from '../schemas/auth';
 import { useNavigate } from 'react-router';
 import { RegisterUser } from '../api/auth';
+import { BorderBeam } from '../components/ui/border-beam';
 
 const RegisterPage = () => {
     const {
@@ -89,6 +90,7 @@ const RegisterPage = () => {
                     >
                         {isSubmitting ? 'กำลังลงทะเบียน...' : 'เริ่มการผจญภัย'}
                     </button>
+                    <BorderBeam duration={8} size={100} />
                 </form>
             </div>
         </div>

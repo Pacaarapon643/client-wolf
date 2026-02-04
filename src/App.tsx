@@ -2,17 +2,16 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router"
 import HomePage from "./pages/HomePage"
 import RegisterPage from "./pages/RegisterPage"
 import LoginPage from "./pages/LoginPage"
+import GameLobbyPage from "./pages/GameLobbyPage"
 import Navbar from "./components/Navbar"
+import TestPage from "./pages/test"
+import { AuthProvider } from "./context/AuthContext"
 
 // Layout component with Navbar
 function Layout() {
     return (
         <div>
-            <Navbar
-                isLoggedIn={false}
-                username=""
-                onLogout={() => console.log('Logout')}
-            />
+            <Navbar />  {/* ← ไม่ต้องส่ง props แล้ว จะใช้ useAuth ข้างใน */}
             <Outlet /> {/* แสดง child routes ตรงนี้ */}
         </div>
     )
@@ -33,6 +32,14 @@ const router = createBrowserRouter([
                 path: "login",
                 element: <LoginPage />,
             },
+            {
+                path: "lobby",
+                element: <GameLobbyPage />,
+            },
+            {
+                path: "test",
+                element: <TestPage />,
+            }
         ],
     },
 
@@ -40,8 +47,11 @@ const router = createBrowserRouter([
 
 // App component
 function App() {
-    return <RouterProvider router={router} />
+    return (
+        <AuthProvider>
+            <RouterProvider router={router} />
+        </AuthProvider>
+    )
 }
-
 
 export default App

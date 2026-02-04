@@ -3,9 +3,12 @@ import { useNavigate } from "react-router"
 import { LoginSchema, type LoginInput } from "../schemas/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginUser } from "../api/auth";
+import { useAuth } from "../context/AuthContext";
+
 
 
 const LoginPage = () => {
+    const { login } = useAuth();
     const navigate = useNavigate();
     const {
         register,
@@ -20,8 +23,14 @@ const LoginPage = () => {
 
     const onSubmit = async (data: LoginInput) => {
         try {
-            const res = await LoginUser(data);
-            navigate('/')
+            const response = await LoginUser(data);
+            // response.data เป็น object เดียว ไม่ใช่ array
+            login({
+                id: response.data.id,
+                username: response.data.user_name, // ← ใช้ user_name จาก Backend
+                email: response.data.email,
+            });
+            navigate('/lobby')
         } catch (error: any) {
             if (error.message === "record not found") {
                 alert("ไม่พบผู้ใช้งาน");
