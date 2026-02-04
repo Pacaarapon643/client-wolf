@@ -1,32 +1,57 @@
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router"
 import HomePage from "./pages/HomePage"
+import RegisterPage from "./pages/RegisterPage"
+import LoginPage from "./pages/LoginPage"
+import GameLobbyPage from "./pages/GameLobbyPage"
 import Navbar from "./components/Navbar"
+import TestPage from "./pages/test"
+import { AuthProvider } from "./context/AuthContext"
 
-const App = () => {
-  // ตัวอย่างการใช้งาน - สามารถเชื่อมต่อกับ state management ได้ภายหลัง
-  const handleLogin = () => {
-    console.log('Open login modal')
-  }
+// Layout component with Navbar
+function Layout() {
+    return (
+        <div>
+            <Navbar />  {/* ← ไม่ต้องส่ง props แล้ว จะใช้ useAuth ข้างใน */}
+            <Outlet /> {/* แสดง child routes ตรงนี้ */}
+        </div>
+    )
+}
 
-  const handleLogout = () => {
-    console.log('Logout')
-  }
+// สร้างโครงสร้าง Route
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Layout />,
+        children: [
+            { index: true, element: <HomePage /> },
+            {
+                path: "register",
+                element: <RegisterPage />,
+            },
+            {
+                path: "login",
+                element: <LoginPage />,
+            },
+            {
+                path: "lobby",
+                element: <GameLobbyPage />,
+            },
+            {
+                path: "test",
+                element: <TestPage />,
+            }
+        ],
+    },
 
-  const handleRegister = () => {
-    console.log('Open register modal')
-  }
+])
 
-  return (
-    <div >
-      <Navbar
-        isLoggedIn={false}
-        username=""
-        onLogin={handleLogin}
-        onLogout={handleLogout}
-        onRegister={handleRegister}
-      />
-      <HomePage />
-    </div>
-  )
+// App component
+function App() {
+    return (
+        <AuthProvider>
+            <RouterProvider router={router} />
+        </AuthProvider>
+    )
 }
 
 export default App
