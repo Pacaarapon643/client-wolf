@@ -40,10 +40,10 @@ const HomePage = () => {
                     <div className="text-6xl mb-4 drop-shadow-[0_0_20px_rgba(255,215,0,0.5)] animate-floating">
                         🌙
                     </div>
-                    <h1 className="text-6xl font-black tracking-[0.3em] m-0 mb-2 bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent [filter:drop-shadow(0_0_40px_rgba(255,255,255,0.3))] animate-floating">
+                    <h1 className="text-4xl sm:text-6xl font-black tracking-[0.3em] m-0 mb-2 bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent [filter:drop-shadow(0_0_40px_rgba(255,255,255,0.3))] animate-floating">
                         WEREWOLF
                     </h1>
-                    <p className="text-xl text-gray-500 mt-2 tracking-[0.2em] animate-floating">
+                    <p className="text-lg sm:text-xl text-gray-500 mt-2 tracking-[0.2em] animate-floating">
                         หมาป่าล่าชาวบ้าน
                     </p>
 

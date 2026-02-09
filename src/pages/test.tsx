@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+// import { useNavigate } from 'react-router';
 
 interface Room {
     id: string;
@@ -11,7 +11,7 @@ interface Room {
 }
 
 const TestPage = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [showRulesModal, setShowRulesModal] = useState(false);

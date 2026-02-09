@@ -42,8 +42,8 @@ const LoginPage = () => {
 
     return (
         <div className="flex justify-center items-center h-screen bg-gradient-to-br from-dark-900 via-dark-800 to-dark-700 relative overflow-hidden">
-            <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] animate-slide-up">
-                <h1 className="text-4xl text-center font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF00FF] via-[#00FFFF] to-[#FF4D00] animate-rainbow-text bg-[length:200%_auto] mb-8">
+            <div className="w-full max-w-[300px] sm:max-w-md  bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] animate-slide-up">
+                <h1 className="text-4xl  text-center font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FF00FF] via-[#00FFFF] to-[#FF4D00] animate-rainbow-text bg-[length:200%_auto] mb-8">
                     เข้าสู่ระบบ
                 </h1>
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
