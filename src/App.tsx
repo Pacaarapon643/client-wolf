@@ -9,6 +9,8 @@ import Navbar from "./components/Navbar"
 import TestPage from "./pages/test"
 import { AuthProvider } from "./context/AuthContext"
 import GameRoomPage from "./pages/GameRoomPage"
+import GamePlayPage from "./pages/GamePlayPage"
+// import BackgroundSlideshow from "./pages/GamePlayPage"
 
 // Layout component with Navbar
 function Layout() {
@@ -54,6 +56,10 @@ const router = createBrowserRouter([
             {
                 path: "test",
                 element: <TestPage />,
+            },
+            {
+                path: "gameplay",
+                element: <GamePlayPage />,
             }
         ],
     },

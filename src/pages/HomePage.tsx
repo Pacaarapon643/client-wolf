@@ -11,7 +11,7 @@ const HomePage = () => {
     };
 
     return (
-        <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-dark-900 via-dark-800 to-dark-700 relative overflow-hidden font-sans">
+        <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-dark-900 via-dark-800 to-dark-700 relative overflow-hidden font-kanit">
             {/* Background Glow Effect */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle,_rgba(139,69,255,0.15)_0%,_transparent_70%)] pointer-events-none animate-pulse-glow"></div>
 
