@@ -7,4 +7,4 @@ export interface BaseResponse<T> {
 
 export type BaseResponseNodata = BaseResponse<void>;
 
-
+export type BaseResponseString = BaseResponse<string>;

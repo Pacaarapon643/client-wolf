@@ -12,6 +12,8 @@ import { useAuth } from "../context/AuthContext";
 import { getCountUser } from "../api/user";
 import type { WsMessage } from "../types/ws";
 import RulesGame from "../components/RulesGame/RulesGame";
+import { ShootingStars } from "@/components/ui/shooting-stars";
+import { StarsBackground } from "@/components/ui/stars-background";
 
 const PlayerProgressBar = ({ current = 3, max = 8 }) => {
   // คำนวณเปอร์เซ็นต์
@@ -209,19 +211,9 @@ const GameLobbyPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden flex flex-col items-center">
-
-      <div
-        className="absolute inset-0 pointer-events-none opacity-40 scale-150 rotate-12"
-        style={{
-          backgroundImage: `
-            radial-gradient(2px 2px at 20px 30px, white, transparent),
-            radial-gradient(2px 2px at 160px 120px, rgba(255,255,255,0.9), transparent),
-            radial-gradient(1px 1px at 400px 60px, white, transparent)
-          `,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '400px 400px'
-        }}
-      />
+      <ShootingStars />
+      <StarsBackground />
+     
 
 
       <div className="relative z-10 mt-24 flex flex-col items-center animate-floating">
@@ -454,7 +446,7 @@ const GameLobbyPage = () => {
         </motion.button>
       </div>
 
-      <div className="w-full max-w-6xl mx-auto mt-8 grid grid-cols-2 gap-6 px-2 sm:px-0">
+      <div className="w-full max-w-6xl mx-auto mt-8 grid grid-cols-2 gap-6 px-2 sm:px-0 z-10">
         {room.map((room, index) => (
           <motion.div
             key={room.id}

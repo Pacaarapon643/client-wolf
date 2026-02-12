@@ -1,37 +1,130 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import VotingTimer from "../components/effect/VotingTimer";
+import { useParams, useSearchParams } from "react-router";
+import { useAuth } from "../context/AuthContext";
+import { GetRole } from "../api/game";
+import type { GetRoomMemberResponse } from "../types/room";
+import { GetRoomMember } from "../api/room";
+import type { ChatMessage } from "../types/game";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ShootingStars } from "@/components/ui/shooting-stars";
+import { StarsBackground } from "@/components/ui/stars-background";
 
 
 const GamePlayPage = () => {
-
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+    const [messageInput, setMessageInput] = useState<string>("")
+    const chatEndRef = useRef<HTMLDivElement>(null)
+    const { room_id } = useParams()
+    const [searchParams] = useSearchParams();
+    const max_room = Number(searchParams.get('max_room'));
+    const [member, setMember] = useState<GetRoomMemberResponse | null>(null)
+    const { user } = useAuth()
+    const [role, setRole] = useState<string | null>(null)
+    const wsRef = useRef<WebSocket | null>(null);
     const images = [
-        "/bg-game-day.png",
+        "/bg-day.png",
         "/Gemini_Generated_Image_x8sksgx8sksgx8sk.png",
         "/ชาวบ้าน1.png"
     ]
 
-
-
-    const [indeximg, setIndeximg] = useState(0)
+    const [indeximg] = useState(0)
     useEffect(() => {
+        if (!user) {
+            return
+        }
+        gerRole()
+        getMember()
+
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
+        const ws = new WebSocket(`${protocol}//${window.location.host}/api/games/ws-game`)
+        wsRef.current = ws
+
+        ws.onopen = () => {
+            console.log("✅ WebSocket game connected")
+
+            const joinMessage = {
+                type: "join",
+                room_id: room_id,
+                user_id: user?.id,
+                username: user?.username,
+            }
+
+            ws.send(JSON.stringify(joinMessage));
+        }
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data)
+            console.log(data);
+
+            if (data.type === "chat") {
+                setChatMessages(prev => [...prev, {
+                    sender: data.sender,
+                    content: data.content,
+                    timestamp: data.timestamp
+                }])
+            }
+        }
+
         // const timer = setInterval(() => {
         //     setIndeximg((prev) => (prev === 0 ? 1 : 0));
         // }, 5000);
         // return () => clearInterval(timer);
-    }, []);
-    
 
+        return () => {
+            ws.close()
+        }
 
+    }, [user, room_id]);
+
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }, [chatMessages])
+
+    const gerRole = async () => {
+        try {
+            const res = await GetRole(room_id!, user?.id!)
+            setRole(res.data)
+        } catch (error) {
+            alert(error)
+        }
+    }
+
+    const getMember = async () => {
+        try {
+            const res = await GetRoomMember(room_id!, max_room)
+            setMember(res)
+        } catch (error) {
+            alert(error)
+        }
+    }
+
+    const handleSendMessage = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!messageInput.trim() || !wsRef.current) return
+        const chatData = {
+            type: "chat",
+            content: messageInput,
+            sender: user?.username,
+            room_id: room_id
+        }
+
+        wsRef.current.send(JSON.stringify(chatData))
+        setMessageInput("")
+    }
 
     return (
         <div className="hidden sm:block min-h-screen bg-[#020617] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-slate-900 to-black relative overflow-hidden h-screen font-kanit">
+            {/* Animated Background */}
+            <ShootingStars />
+            <StarsBackground />
 
             {/* ส่วน Grid */}
             <div className="relative z-10 grid grid-cols-3 grid-cols-[auto_1fr_auto] h-full pt-[80px] gap-6 px-6 pb-6">
 
                 {/* คอลัมน์ที่ 1: ห้องแชท */}
-                <div className="flex flex-col h-full w-[300px]">
+                <div className="flex flex-col h-[90vh] w-[350px]">
                     {/* ส่วนหัวแชท */}
                     <div className="rounded-t-2xl border border-white/10 border-b-0 bg-blue-950/20 backdrop-blur-xl p-4 shadow-lg shadow-blue-500/5">
                         <p className="text-white text-lg font-bold flex items-center gap-2">
@@ -41,24 +134,53 @@ const GamePlayPage = () => {
                     </div>
 
                     {/* ส่วนเนื้อหาแชท */}
-                    <div className="flex-1 overflow-y-auto border border-white/10 bg-blue-950/10 backdrop-blur-xl p-4 space-y-4 custom-scrollbar">
-                        <div className="text-blue-300/40 text-xs font-medium tracking-widest text-center border-b border-white/5 pb-2 uppercase">
-                            Midnight Conversations
+                    <ScrollArea className="flex-1 border border-white/10 bg-blue-950/10 backdrop-blur-xl">
+                        <div className="p-4 space-y-4">
+                            <div className="text-blue-300/40 text-xs font-medium tracking-widest text-center border-b border-white/5 pb-2 uppercase">
+                                Midnight Conversations
+                            </div>
+                            {chatMessages.map((msg, index) => {
+                                const isMe = msg.sender === user?.username;
+
+                                return (
+                                    <div
+                                        key={index}
+                                        className={`flex w-full mb-2 ${isMe ? 'justify-end' : 'justify-start'}`}
+                                    >
+                                        <div className={`
+                        p-3 max-w-[75%] rounded-2xl
+                        ${isMe
+                                                ? 'bg-blue-600 text-white rounded-tr-none'
+                                                : 'bg-white/10 text-white rounded-tl-none'
+                                            }
+                    `}>
+                                            {!isMe && <div className="text-[10px] text-blue-400 mb-1">{msg.sender}</div>}
+                                            <div className="text-sm break-words">{msg.content}</div>
+                                            {/* <p className="text-[10px] text-blue-400 mb-1">{msg.timestamp.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</p> */}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            <div ref={chatEndRef} />
                         </div>
-                        {/* ข้อความแชทต่างๆ จะอยู่ตรงนี้ */}
-                    </div>
+                    </ScrollArea>
 
                     {/* ส่วนท้ายแชท (ช่องพิมพ์) */}
                     <div className="rounded-b-2xl border border-white/10 border-t-0 bg-blue-950/20 backdrop-blur-xl p-3">
                         <div className="relative group">
-                            <input
-                                type="text"
-                                placeholder="ส่งข้อความถึงทุกคน..."
-                                className="w-full bg-black/40 hover:bg-black/60 border border-white/10 focus:border-blue-500/50 text-white placeholder:text-white/20 px-4 py-3 rounded-xl focus:outline-none transition-all duration-300"
-                            />
-                            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400 hover:text-cyan-300 hover:scale-110 transition-all">
-                                🚀
-                            </button>
+                            <form onSubmit={handleSendMessage}>
+                                <input
+                                    value={messageInput}
+                                    onChange={(e) => setMessageInput(e.target.value)}
+                                    type="text"
+                                    placeholder="ส่งข้อความถึงทุกคน..."
+                                    className="w-full bg-black/40 hover:bg-black/60 border border-white/10 focus:border-blue-500/50 text-white placeholder:text-white/20 px-4 py-3 rounded-xl focus:outline-none transition-all duration-300"
+                                />
+                                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400 hover:text-cyan-300 hover:scale-110 transition-all">
+                                    🚀
+                                </button>
+                            </form>
+
                         </div>
                     </div>
                 </div>
@@ -69,13 +191,9 @@ const GamePlayPage = () => {
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-indigo-500/10 opacity-40"></div>
                         <div className="absolute inset-0 border-[2px] border-white/5 rounded-3xl pointer-events-none"></div>
                         <div className="grid grid-cols-3 gap-3 p-4">
-                            {[
-                                { icon: "🎮", title: "สร้างห้อง", desc: "เป็นเจ้าของห้องและเริ่มเกม" },
-                                { icon: "🚪", title: "เข้าร่วมห้อง", desc: "เริ่มเกมเลย" },
-                                { icon: "📘", title: "วิธีการเล่น", desc: "เรียนรู้วิธีการเล่นเกม" },
-                            ].map((item, index) => (
+                            {member?.data?.map((_, index) => (
                                 <div key={index} className="relative overflow-hidden rounded-xl  h-[300px]">
-                                    <AnimatePresence mode="wait">
+                                    <AnimatePresence >
                                         <motion.img
                                             key={images[indeximg]}
                                             src={images[indeximg]}
@@ -98,6 +216,7 @@ const GamePlayPage = () => {
                                             // ใช้ Tailwind จัดการขนาดและตำแหน่ง
                                             className="absolute  bottom-[0%]  left-[32%] w-[150px] h-[170px] object-cover"
                                         />
+
                                     </AnimatePresence>
 
                                 </div>
@@ -106,14 +225,17 @@ const GamePlayPage = () => {
                     </div>
                     <div className="h-[100px] border border-white/10 flex justify-between items-center p-4">
                         <div className="flex gap-2">
-                            <div className="bg-red-500 w-[50px] h-[50px] rounded-xl">
+                            <div className=" w-[50px] h-[50px] rounded-xl">
                                 <div className="text-2xl w-full h-full flex items-center justify-center">
-                                    <img src="/4081853.png" alt="wolf" className="w-full h-full object-cover" />
+                                    {role === "seer" && <img src="/seer.png" alt="seer" className="w-full h-full object-cover" />}
+                                    {role === "werewolf" && <img src="/werewolf.png" alt="werewolf" className="w-full h-full object-cover" />}
+                                    {role === "villager" && <img src="/villager.png" alt="villager" className="w-full h-full object-cover" />}
+                                    {role === "guard" && <img src="/guard.png" alt="guard" className="w-full h-full object-cover" />}
                                 </div>
                             </div>
                             <div className="text-xl text-white flex flex-col">
-                                <p>คุณคือหมาป่า</p>
-                                <p>คุณคือหมาป่า</p>
+                                <p>คุณคือ: {role === "seer" && "ผู้สังเกต" || role === "werewolf" && "หมาป่า" || role === "villager" && "ชาวบ้าน" || role === "guard" && "ยาม"}</p>
+                                <p>{role === "seer" && "คุณสามารถมองเห็นบทบาทของผู้เล่นหนึ่งในคืนนี้" || role === "werewolf" && "คุณสามารถโหวตฆ่าผู้เล่นหนึ่งในตอนกลางคืน" || role === "villager" && "คุณเป็นแค่คนธรรมดา" || role === "guard" && "คุณสามารถป้องกันผู้เล่นหนึ่งในตอนกลางคืนหรือป้องกันตัวเองได้"}</p>
                             </div>
                         </div>
 

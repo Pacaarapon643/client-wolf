@@ -56,6 +56,11 @@ const GameRoomPage = () => {
             if (msg.type === "load_room") {
                 const resRoom = await OnGetRoomById();
                 await OnGetRoomMember(resRoom?.data.total_player!);
+            } else if (msg.type === "start_game") {
+                const params = new URLSearchParams({
+                    max_room: max_room
+                })
+                navigate(`/game/${room_id}?${params.toString()}`)
             }
         }
 
@@ -127,6 +132,25 @@ const GameRoomPage = () => {
 
     }
 
+    const StartGame = () => {
+        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+            console.error("WebSocket is not connected!");
+            return;
+        }
+
+        const data = {
+            type: "start_game",
+            room_id: room_id,
+        }
+
+        wsRef.current.send(JSON.stringify(data));
+        const params = new URLSearchParams({
+            max_room: max_room
+        })
+        navigate(`/game/${room_id}?${params.toString()}`)
+
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden flex flex-col items-center">
             <Meteors />
@@ -176,7 +200,7 @@ const GameRoomPage = () => {
                         <Card
                             key={member.slot_index || index}
                             className={`bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-white/10 rounded-xl flex flex-col items-center gap-2 relative px-10 py-4 mt-5 h-full min-h-[180px]
-                              ${isReady && user?.id === member.user_id && "shadow-[0_0_20px_rgba(34,197,94,0.3)]"}    
+                              ${member.is_ready && "shadow-[0_0_20px_rgba(34,197,94,0.3)]"}    
                             `}
                         >
                             {!member.empty_slot ? (
@@ -223,7 +247,7 @@ const GameRoomPage = () => {
                         transition={{ duration: 0.2 }}
                         disabled={!isAllReady}
                         onClick={() => {
-                            alert("เริ่มเกม")
+                            StartGame()
                         }}
                         className={`w-full  max-w-[150px] sm:max-w-md  font-semibold py-2 px-4 rounded-xl mt-5 border border-green-600/50 shadow-lg shadow-green-500/20 cursor-pointer
                             ${isAllReady ? "bg-green-600/20 text-green-400 cursor-pointer" : "bg-green-600/20 text-green-400 cursor-not-allowed opacity-50"}`}
