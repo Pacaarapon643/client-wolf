@@ -2,30 +2,32 @@ import { useState, useEffect } from 'react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-const VotingTimer = ({ initialSeconds = 60 }) => {
-    const [seconds, setSeconds] = useState(initialSeconds);
-    const totalTime = 60; // ตั้งเวลาเต็มไว้ที่ 60 วินาที
+interface VotingTimerProps {
+    initialSeconds?: number;
+    children?: React.ReactNode;
+    phase?: string;
+}
 
-    useEffect(() => {
-        if (seconds <= 0) return;
+const VotingTimer: React.FC<VotingTimerProps> = ({ initialSeconds = 60, children, phase }) => {
+    let totalTime = initialSeconds;
+    if (phase == "day") {
+        totalTime = 60;
+    }
+    if (phase == "night") {
+        totalTime = 30;
+    }
+    if (phase == "vote") {
+        totalTime = 30;
+    }
 
-        const timer = setInterval(() => {
-            setSeconds((prev) => prev - 1);
-        }, 1000);
-
-        // ล้างนาฬิกาเมื่อเลิกใช้ (เหมือนที่พี่เคยเขียนเลย!)
-        return () => clearInterval(timer);
-    }, [seconds]);
-
-    // คำนวณเปอร์เซ็นต์สำหรับวงกลม
-    const percentage = (seconds / totalTime) * 100;
+    const percentage = (initialSeconds / totalTime) * 100;
 
     return (
         <div className="flex flex-col items-center justify-center  bg-[#0f172a] rounded-3xl border border-white/10 p-6 w-full">
             <div className="w-40 h-40 mb-6 relative">
                 <CircularProgressbar
                     value={percentage}
-                    text={`${seconds}`}
+                    text={`${initialSeconds}`}
                     strokeWidth={2}
                     styles={buildStyles({
                         // สีม่วงสว่างแบบในรูป
@@ -43,11 +45,11 @@ const VotingTimer = ({ initialSeconds = 60 }) => {
                     <span className="text-white/40 text-[10px] uppercase tracking-widest">Seconds</span>
                 </div>
             </div>
-
-            <div className="text-center">
+            {children}
+            {/* <div className="text-center">
                 <h3 className="text-white text-xl font-semibold mb-1">Voting Phase</h3>
                 <p className="text-white/40 text-sm">Choose wisely...</p>
-            </div>
+            </div> */}
         </div>
     );
 };

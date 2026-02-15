@@ -213,7 +213,7 @@ const GameLobbyPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden flex flex-col items-center">
       <ShootingStars />
       <StarsBackground />
-     
+
 
 
       <div className="relative z-10 mt-24 flex flex-col items-center animate-floating">

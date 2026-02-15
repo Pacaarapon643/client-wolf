@@ -58,7 +58,8 @@ const GameRoomPage = () => {
                 await OnGetRoomMember(resRoom?.data.total_player!);
             } else if (msg.type === "start_game") {
                 const params = new URLSearchParams({
-                    max_room: max_room
+                    max_room: max_room,
+                    game_id: msg.content
                 })
                 navigate(`/game/${room_id}?${params.toString()}`)
             }

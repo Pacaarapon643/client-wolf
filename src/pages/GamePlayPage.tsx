@@ -3,39 +3,51 @@ import React, { useEffect, useRef, useState } from "react";
 import VotingTimer from "../components/effect/VotingTimer";
 import { useParams, useSearchParams } from "react-router";
 import { useAuth } from "../context/AuthContext";
-import { GetRole } from "../api/game";
+import { GetGamePlayer, GetRole } from "../api/game";
 import type { GetRoomMemberResponse } from "../types/room";
 import { GetRoomMember } from "../api/room";
-import type { ChatMessage } from "../types/game";
+import type { ChatMessage, GetGamePlayerResponse } from "../types/game";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShootingStars } from "@/components/ui/shooting-stars";
 import { StarsBackground } from "@/components/ui/stars-background";
+import CardNight from "@/components/effect/CardNight";
+import CardDay from "@/components/effect/CardDay";
+
 
 
 const GamePlayPage = () => {
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
     const [messageInput, setMessageInput] = useState<string>("")
+    const [showCardNight, setShowCardNight] = useState<boolean>(false)
+    const [showCardDay, setShowCardDay] = useState<boolean>(false)
+    const [time, setTime] = useState<number>(0);
+    const [vote, setVote] = useState<boolean>(false)
     const chatEndRef = useRef<HTMLDivElement>(null)
     const { room_id } = useParams()
     const [searchParams] = useSearchParams();
     const max_room = Number(searchParams.get('max_room'));
-    const [member, setMember] = useState<GetRoomMemberResponse | null>(null)
+    const game_id = String(searchParams.get('game_id'))
+    const [player, setPlayer] = useState<GetGamePlayerResponse | null>(null)
     const { user } = useAuth()
     const [role, setRole] = useState<string | null>(null)
     const wsRef = useRef<WebSocket | null>(null);
+    const [phase, setPhase] = useState<string>("wait")
     const images = [
         "/bg-day.png",
         "/Gemini_Generated_Image_x8sksgx8sksgx8sk.png",
-        "/ชาวบ้าน1.png"
+        "/download2026020420328.png"
     ]
-
+    const [night, setNight] = useState<boolean>(false)
+    const [day, setDay] = useState<boolean>(false)
     const [indeximg] = useState(0)
+
     useEffect(() => {
         if (!user) {
             return
         }
-        gerRole()
-        getMember()
+
+        getRole()
+        getGamePlayer()
 
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
         const ws = new WebSocket(`${protocol}//${window.location.host}/api/games/ws-game`)
@@ -52,6 +64,7 @@ const GamePlayPage = () => {
             }
 
             ws.send(JSON.stringify(joinMessage));
+
         }
 
         ws.onmessage = (event) => {
@@ -65,12 +78,55 @@ const GamePlayPage = () => {
                     timestamp: data.timestamp
                 }])
             }
+
+            if (data.type === "start_game") {
+                handleStartGame()
+            }
+
+            if (data.type === "sync_time") {
+                if (data.phase === "night") {
+                    setNight(true)
+
+                    setDay(false)
+                    setVote(false)
+                    setPhase(data.phase)
+                    setTime(data.remaining)
+                    if (data.remaining === 30) {
+                        setShowCardNight(true)
+                    } else if (data.remaining <= 28) {
+                        setShowCardNight(false)
+                    }
+                }
+                if (data.phase === "day") {
+                    setNight(false)
+                    setVote(false)
+                    setPhase(data.phase)
+                    setDay(true)
+                    setTime(data.remaining)
+                    if (data.remaining === 60) {
+                        setShowCardDay(true)
+                    } else if (data.remaining <= 58) {
+                        setShowCardDay(false)
+                    }
+                }
+                if (data.phase === "vote") {
+                    setNight(false)
+                    setVote(true)
+                    setDay(false)
+                    setPhase(data.phase)
+                    setTime(data.remaining)
+                }
+                if (data.phase === "ready_to_start") {
+                    setNight(false)
+                    setVote(false)
+                    setDay(false)
+                    setPhase(data.phase)
+                    setTime(data.remaining)
+                }
+            }
         }
 
-        // const timer = setInterval(() => {
-        //     setIndeximg((prev) => (prev === 0 ? 1 : 0));
-        // }, 5000);
-        // return () => clearInterval(timer);
+
 
         return () => {
             ws.close()
@@ -78,23 +134,124 @@ const GamePlayPage = () => {
 
     }, [user, room_id]);
 
+
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }, [chatMessages])
 
-    const gerRole = async () => {
+    // นับเวลาเปิดการ์ดกลางคืน
+    // useEffect(() => {
+    //     let timer: ReturnType<typeof setInterval> | undefined;
+
+    //     if (showCardNight && secondsNight > 0) {
+    //         timer = setInterval(() => {
+    //             setSecondsNight((prev) => {
+    //                 if (prev <= 1) {
+    //                     setShowCardNight(false);
+    //                     return 0;
+    //                 }
+    //                 return prev - 1;
+    //             });
+    //         }, 1000);
+    //     }
+
+    //     return () => clearInterval(timer);
+    // }, [showCardNight]);
+
+    // นับเวลาเปิดการ์ดกลางวัน
+    // useEffect(() => {
+    //     let timer: ReturnType<typeof setInterval> | undefined;
+
+    //     if (showCardDay && secondsDay > 0) {
+    //         timer = setInterval(() => {
+    //             setSecondsDay((prev) => {
+    //                 if (prev <= 1) {
+    //                     setShowCardDay(false);
+    //                     return 0;
+    //                 }
+    //                 return prev - 1;
+    //             });
+    //         }, 1000);
+    //     }
+
+    //     return () => clearInterval(timer);
+    // }, [showCardDay]);
+
+    // นับเวลากลางคืน
+    // useEffect(() => {
+    //     let timer: ReturnType<typeof setInterval> | undefined;
+    //     if (night && timeNight > 0) {
+    //         timer = setInterval(() => {
+    //             setTimeNight((prev) => {
+    //                 if (prev <= 1) {
+    //                     setNight(false)
+    //                     setDay(true)
+    //                     setShowCardDay(true)
+    //                     setTimeDay(60)
+    //                     setSecondsDay(2) // Reset for next day cycle
+    //                     return 0
+    //                 }
+    //                 return prev - 1
+    //             })
+    //         }, 1000);
+    //     }
+    //     return () => clearInterval(timer)
+    // }, [night])
+
+    // นับเวลาประชุม
+    // useEffect(() => {
+    //     let timer: ReturnType<typeof setInterval> | undefined;
+    //     if (day && timeDay > 0) {
+    //         timer = setInterval(() => {
+    //             setTimeDay((prev) => {
+    //                 if (prev <= 1) {
+    //                     setVote(true)
+    //                     setTimeVote(30)
+    //                     return 0
+    //                 }
+    //                 return prev - 1
+    //             })
+    //         }, 1000);
+    //     }
+    //     return () => clearInterval(timer)
+    // }, [day, vote])
+
+    // นับเวลาโหวต
+    // useEffect(() => {
+    //     let timer: ReturnType<typeof setInterval> | undefined;
+    //     if (vote && timeVote > 0) {
+    //         timer = setInterval(() => {
+    //             setTimeVote((prev) => {
+    //                 if (prev <= 1) {
+    //                     setVote(false)
+    //                     setDay(false)
+    //                     setTimeNight(30)
+    //                     setNight(true)
+    //                     setShowCardNight(true)
+    //                     setSecondsNight(2) // Reset for next day cycle
+    //                     return 0
+    //                 }
+    //                 return prev - 1
+    //             })
+    //         }, 1000);
+    //     }
+    //     return () => clearInterval(timer)
+    // }, [vote])
+
+    const getRole = async () => {
         try {
             const res = await GetRole(room_id!, user?.id!)
+
             setRole(res.data)
         } catch (error) {
             alert(error)
         }
     }
 
-    const getMember = async () => {
+    const getGamePlayer = async () => {
         try {
-            const res = await GetRoomMember(room_id!, max_room)
-            setMember(res)
+            const res = await GetGamePlayer(game_id)
+            setPlayer(res)
         } catch (error) {
             alert(error)
         }
@@ -114,6 +271,17 @@ const GamePlayPage = () => {
         setMessageInput("")
     }
 
+    const handleStartGame = () => {
+        if (!wsRef.current) return
+        const chatData = {
+            type: "start_game",
+            room_id: room_id
+        }
+
+        wsRef.current.send(JSON.stringify(chatData))
+    }
+
+
     return (
         <div className="hidden sm:block min-h-screen bg-[#020617] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-slate-900 to-black relative overflow-hidden h-screen font-kanit">
             {/* Animated Background */}
@@ -124,7 +292,7 @@ const GamePlayPage = () => {
             <div className="relative z-10 grid grid-cols-3 grid-cols-[auto_1fr_auto] h-full pt-[80px] gap-6 px-6 pb-6">
 
                 {/* คอลัมน์ที่ 1: ห้องแชท */}
-                <div className="flex flex-col h-[90vh] w-[350px]">
+                <div className="flex flex-col h-[90vh] w-[18vw]">
                     {/* ส่วนหัวแชท */}
                     <div className="rounded-t-2xl border border-white/10 border-b-0 bg-blue-950/20 backdrop-blur-xl p-4 shadow-lg shadow-blue-500/5">
                         <p className="text-white text-lg font-bold flex items-center gap-2">
@@ -136,9 +304,7 @@ const GamePlayPage = () => {
                     {/* ส่วนเนื้อหาแชท */}
                     <ScrollArea className="flex-1 border border-white/10 bg-blue-950/10 backdrop-blur-xl">
                         <div className="p-4 space-y-4">
-                            <div className="text-blue-300/40 text-xs font-medium tracking-widest text-center border-b border-white/5 pb-2 uppercase">
-                                Midnight Conversations
-                            </div>
+
                             {chatMessages.map((msg, index) => {
                                 const isMe = msg.sender === user?.username;
 
@@ -190,36 +356,17 @@ const GamePlayPage = () => {
                     <div className="h-full border border-white/10 rounded-3xl bg-blue-950/5 backdrop-blur-xl shadow-2xl shadow-black/40 overflow-hidden relative group flex-1">
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-indigo-500/10 opacity-40"></div>
                         <div className="absolute inset-0 border-[2px] border-white/5 rounded-3xl pointer-events-none"></div>
-                        <div className="grid grid-cols-3 gap-3 p-4">
-                            {member?.data?.map((_, index) => (
-                                <div key={index} className="relative overflow-hidden rounded-xl  h-[300px]">
-                                    <AnimatePresence >
-                                        <motion.img
-                                            key={images[indeximg]}
-                                            src={images[indeximg]}
-                                            // กำหนด Animation ด้วย Framer Motion
-                                            initial={{ opacity: 0, scale: 1.1 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ duration: 1.5 }}
-                                            // ใช้ Tailwind จัดการขนาดและตำแหน่ง
-                                            className="absolute inset-0 w-full h-full object-cover"
-                                        />
-                                        <motion.img
-                                            key={images[2]}
-                                            src={images[2]}
-                                            // กำหนด Animation ด้วย Framer Motion
-                                            initial={{ opacity: 0, scale: 1.1 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            transition={{ duration: 1.5 }}
-                                            // ใช้ Tailwind จัดการขนาดและตำแหน่ง
-                                            className="absolute  bottom-[0%]  left-[32%] w-[150px] h-[170px] object-cover"
-                                        />
+                        <div className="grid grid-cols-3 gap-3 p-4 h-[80vh]">
+                            {player?.data?.map((_, index) => (
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    whileHover={{ scale: 1.1 }}
+                                    className="w-full h-full rounded-2xl bg-blue-950/10 backdrop-blur-xl shadow-2xl shadow-black/40"
+                                >
+                                    <div className="text-2xl w-full h-full flex items-center justify-center">
 
-                                    </AnimatePresence>
-
-                                </div>
+                                    </div>
+                                </motion.button>
                             ))}
                         </div>
                     </div>
@@ -276,12 +423,95 @@ const GamePlayPage = () => {
 
 
                 {/* คอลัมน์ที่ 3: ข้อมูลผู้เล่น / สถิติ */}
-                <div className="full border border-white/10 rounded-3xl bg-blue-950/5 backdrop-blur-xl shadow-2xl shadow-black/40 overflow-hidden relative w-[300px]">
+                <div className="full border border-white/10 rounded-3xl bg-blue-950/5 backdrop-blur-xl shadow-2xl shadow-black/40 overflow-hidden relative w-[25vh]">
                     <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 via-transparent to-cyan-500/10 opacity-40"></div>
                     <div className="absolute inset-0 border-[2px] border-white/5 rounded-3xl pointer-events-none"></div>
-                    <VotingTimer></VotingTimer>
+                    {night && role === "villager" && (
+                        <VotingTimer initialSeconds={time} phase={phase}  >
+                            <div className="text-center">
+                                <h3 className="text-white text-xl font-semibold mb-1">หมาป่ากำลังล่า...</h3>
+                                <p className="text-white/40 text-sm">ขอให้โชคดีในคืนนี้</p>
+                            </div>
+                        </VotingTimer>
+                    )}
+                    {night && role === "werewolf" && (
+                        <VotingTimer initialSeconds={time} phase={phase}  >
+                            <div className="text-center">
+                                <h3 className="text-white text-xl font-semibold mb-1">ได้เวลาออกล่ายามค่ำคืน</h3>
+                                <p className="text-white/40 text-sm">เลือกเหยื่อของคุณ</p>
+                            </div>
+                        </VotingTimer>
+                    )}
+                    {night && role === "seer" && (
+                        <VotingTimer initialSeconds={time} phase={phase} >
+                            <div className="text-center">
+                                <h3 className="text-white text-xl font-semibold mb-1">ดวงตาวิเศษได้ตื่นขึ้นแล้ว</h3>
+                                <p className="text-white/40 text-sm">เลือกคนที่คุณสงสัย</p>
+                            </div>
+                        </VotingTimer>
+                    )}
+                    {night && role === "guard" && (
+                        <VotingTimer initialSeconds={time} phase={phase} >
+                            <div className="text-center">
+                                <h3 className="text-white text-xl font-semibold mb-1">พลังผู้พิทักษ์ได้ตื่นขึ้นแล้ว</h3>
+                                <p className="text-white/40 text-sm">เลือกคนที่คุณจะปกป้อง</p>
+                            </div>
+                        </VotingTimer>
+                    )}
+                    {day && !vote && (
+                        <VotingTimer initialSeconds={time} phase={phase} >
+                            <div className="text-center">
+                                <h3 className="text-white text-xl font-semibold mb-1">เริ่มการประชุม</h3>
+                                <p className="text-white/40 text-sm">พุดคุยเพื่อหาหลักฐาน</p>
+                            </div>
+                        </VotingTimer>
+                    )}
+                    {vote && (
+                        <VotingTimer initialSeconds={time} phase={phase} >
+                            <div className="text-center">
+                                <h3 className="text-white text-xl font-semibold mb-1">เริ่มการโหวต</h3>
+                                <p className="text-white/40 text-sm">เลือกคนที่คุณสงสัยหรือเลือกที่จะข้ามการโหวต</p>
+                            </div>
+                        </VotingTimer>
+                    )}
+                    {phase === "wait" && (
+                        <div className="text-center h-full w-full flex flex-col items-center justify-center">
+                            <h3 className="text-white text-xl font-semibold mb-1">รอผู้เล่นเชื่อมต่อ</h3>
+                            <p className="text-white/40 text-sm">รอผู้เล่นครบ {max_room} คน</p>
+                            <p className="text-white/40 text-sm">ทดสอบๆ</p>
+                        </div>
+                    )}
+                    {phase === "ready_to_start" && (
+                        <VotingTimer initialSeconds={time} phase={phase} >
+                            <div className="text-center">
+                                <h3 className="text-white text-xl font-semibold mb-1">เกมกำลังเริ่มใน</h3>
+                            </div>
+                        </VotingTimer>
+                    )}
+
+
+
                 </div>
+
+                <AnimatePresence>
+                    {showCardNight && (
+                        <div key="night-container">
+                            <CardNight />
+                        </div>
+                    )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                    {showCardDay && (
+                        <div key="day-container">
+                            <CardDay />
+                        </div>
+                    )}
+                </AnimatePresence>
+
             </div>
+
+
         </div>
     );
 };
