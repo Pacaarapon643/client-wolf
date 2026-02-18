@@ -145,10 +145,6 @@ const GameRoomPage = () => {
         }
 
         wsRef.current.send(JSON.stringify(data));
-        const params = new URLSearchParams({
-            max_room: max_room
-        })
-        navigate(`/game/${room_id}?${params.toString()}`)
 
     }
 
