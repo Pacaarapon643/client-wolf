@@ -9,3 +9,10 @@ export const roomSchema = z.object({
 });
 
 export type RoomInput = z.infer<typeof roomSchema>;
+
+export const joinRoomSchema = z.object({
+    room_id: z.string()
+        .min(1, { message: "กรุณากรอกรหัสห้อง" }),
+});
+
+export type JoinRoomInput = z.infer<typeof joinRoomSchema>;

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from "../context/useAuth"
 import { motion } from "framer-motion";
 
 const HomePage = () => {
@@ -11,7 +11,7 @@ const HomePage = () => {
     };
 
     return (
-        <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-dark-900 via-dark-800 to-dark-700 relative overflow-hidden font-sans">
+        <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-dark-900 via-dark-800 to-dark-700 relative overflow-hidden font-kanit">
             {/* Background Glow Effect */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle,_rgba(139,69,255,0.15)_0%,_transparent_70%)] pointer-events-none animate-pulse-glow"></div>
 
@@ -40,10 +40,10 @@ const HomePage = () => {
                     <div className="text-6xl mb-4 drop-shadow-[0_0_20px_rgba(255,215,0,0.5)] animate-floating">
                         🌙
                     </div>
-                    <h1 className="text-6xl font-black tracking-[0.3em] m-0 mb-2 bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent [filter:drop-shadow(0_0_40px_rgba(255,255,255,0.3))] animate-floating">
+                    <h1 className="text-4xl sm:text-6xl font-black tracking-[0.3em] m-0 mb-2 bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent [filter:drop-shadow(0_0_40px_rgba(255,255,255,0.3))] animate-floating">
                         WEREWOLF
                     </h1>
-                    <p className="text-xl text-gray-500 mt-2 tracking-[0.2em] animate-floating">
+                    <p className="text-lg sm:text-xl text-gray-500 mt-2 tracking-[0.2em] animate-floating">
                         หมาป่าล่าชาวบ้าน
                     </p>
 

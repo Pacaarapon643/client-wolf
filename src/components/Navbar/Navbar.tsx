@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../context/useAuth'
 
 
 const Navbar = () => {
@@ -95,13 +95,19 @@ const Navbar = () => {
                     ) : (
                         <>
                             <button
-                                onClick={() => navigate('/login')}
+                                onClick={() => {
+                                    navigate('/login')
+                                    setIsMenuOpen(false)
+                                }}
                                 className="w-full px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/20 text-white rounded-xl font-medium transition-all"
                             >
                                 เข้าสู่ระบบ
                             </button>
                             <button
-                                onClick={() => navigate('/register')}
+                                onClick={() => {
+                                    navigate('/register')
+                                    setIsMenuOpen(false)
+                                }}
                                 className="w-full px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-purple-500/20 transition-all"
                             >
                                 สมัครสมาชิก

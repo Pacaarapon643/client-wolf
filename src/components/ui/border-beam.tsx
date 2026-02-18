@@ -1,5 +1,5 @@
 import { motion, type Transition } from "framer-motion"; // เปลี่ยนเป็น framer-motion ตามมาตรฐานส่วนใหญ่
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 interface BorderBeamProps {
   size?: number;

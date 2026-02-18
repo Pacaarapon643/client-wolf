@@ -11,15 +11,13 @@ const api = axios.create({
     },
 });
 
-// --- ทริคเสริม: ระบบดักจับ Error (Interceptors) ---
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // ถ้าหลังบ้านตอบกลับมาว่า 401 (Token หมดอายุ หรือไม่ได้ Login)
         if (error.response?.status === 401) {
             console.error('Session expired, please login again.');
-            // คุณสามารถสั่งเด้งไปหน้าหน้า Login ได้ที่นี่
-            // window.location.href = '/login'; 
+            // บังคับให้ login
+            window.location.href = '/login';
         }
         return Promise.reject(error);
     }
