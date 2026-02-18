@@ -2,7 +2,7 @@ import { Meteors } from "../components/ui/meteors";
 import Moon from "../components/effect/Moon";
 import { useLocation, useNavigate } from "react-router";
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { GetRoomById, GetRoomMember, JoinRoomMember } from "../api/room";
 import type { GetRoomByIdResponse, GetRoomMemberResponse } from "../types/room";
 import { Card } from "../components/ui/card";
@@ -27,6 +27,36 @@ const GameRoomPage = () => {
     const isReady = myData?.is_ready;
     const navigate = useNavigate();
     const wsRef = useRef<WebSocket | null>(null);
+    const OnGetRoomById = async () => {
+        try {
+            const resRoom = await GetRoomById(room_id)
+            setResRoom(resRoom)
+            console.log("resRoom", resRoom);
+            return resRoom
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const OnJoinRoomMember = async (totalPlayer: number) => {
+        try {
+            if (room_id && user?.id && totalPlayer !== undefined) {
+                await JoinRoomMember(room_id, user.id, totalPlayer)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const OnGetRoomMember = async (maxPlayer: number) => {
+        try {
+            const resRoomMember = await GetRoomMember(room_id, maxPlayer)
+            setResRoomMember(resRoomMember)
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
         if (!user) return;
         console.log(user);
@@ -55,7 +85,7 @@ const GameRoomPage = () => {
 
             if (msg.type === "load_room") {
                 const resRoom = await OnGetRoomById();
-                await OnGetRoomMember(resRoom?.data.total_player!);
+                await OnGetRoomMember(resRoom?.data.total_player ?? 0);
             } else if (msg.type === "start_game") {
                 const params = new URLSearchParams({
                     max_room: max_room,
@@ -75,38 +105,8 @@ const GameRoomPage = () => {
             }
         };
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user])
-
-    const OnGetRoomById = async () => {
-        try {
-            const resRoom = await GetRoomById(room_id)
-            setResRoom(resRoom)
-            console.log("resRoom", resRoom);
-            return resRoom
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    const OnJoinRoomMember = async (totalPlayer: number) => {
-
-        try {
-            if (room_id && user?.id && totalPlayer !== undefined) {
-                await JoinRoomMember(room_id, user.id, totalPlayer)
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    const OnGetRoomMember = async (maxPlayer: number) => {
-        try {
-            const resRoomMember = await GetRoomMember(room_id, maxPlayer)
-            setResRoomMember(resRoomMember)
-        } catch (error) {
-            console.log(error);
-        }
-    }
 
     const Exit = () => {
         navigate("/lobby")

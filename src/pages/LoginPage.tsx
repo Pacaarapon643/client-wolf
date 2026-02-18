@@ -3,7 +3,7 @@ import { useNavigate } from "react-router"
 import { LoginSchema, type LoginInput } from "../schemas/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginUser } from "../api/auth";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 
 
 

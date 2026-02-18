@@ -1,7 +1,16 @@
 import { motion } from 'framer-motion'
 
+const STARS = Array.from({ length: 20 }, () => ({
+    width: Math.random() * 3 + 1 + 'px',
+    height: Math.random() * 3 + 1 + 'px',
+    top: Math.random() * 100 + '%',
+    left: Math.random() * 100 + '%',
+    duration: 2 + Math.random() * 3,
+    delay: Math.random() * 2,
+}));
 
 const CardNight = () => {
+
     return (
         <div>
             {/* Backdrop Blur */}
@@ -45,24 +54,24 @@ const CardNight = () => {
 
                     {/* Stars Background Pattern */}
                     <div className="absolute inset-0 opacity-30">
-                        {[...Array(20)].map((_, i) => (
+                        {STARS.map((s, i) => (
                             <motion.div
                                 key={i}
                                 className="absolute bg-white rounded-full"
                                 style={{
-                                    width: Math.random() * 3 + 1 + 'px',
-                                    height: Math.random() * 3 + 1 + 'px',
-                                    top: Math.random() * 100 + '%',
-                                    left: Math.random() * 100 + '%',
+                                    width: s.width,
+                                    height: s.height,
+                                    top: s.top,
+                                    left: s.left,
                                 }}
                                 animate={{
                                     opacity: [0.2, 1, 0.2],
                                     scale: [1, 1.5, 1]
                                 }}
                                 transition={{
-                                    duration: 2 + Math.random() * 3,
+                                    duration: s.duration,
                                     repeat: Infinity,
-                                    delay: Math.random() * 2
+                                    delay: s.delay
                                 }}
                             />
                         ))}

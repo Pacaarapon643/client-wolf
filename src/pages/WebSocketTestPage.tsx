@@ -6,6 +6,7 @@ const WebSocketTestPage = () => {
     const [messages, setMessages] = useState<string[]>([]);
     const [inputMessage, setInputMessage] = useState("");
     const [isConnected, setIsConnected] = useState(false);
+    const [readyState, setReadyState] = useState<number>(-1);
     const wsRef = useRef<WebSocket | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -21,12 +22,13 @@ const WebSocketTestPage = () => {
     useEffect(() => {
         // 1️⃣ สร้างการเชื่อมต่อ WebSocket
         const ws = new WebSocket("ws://localhost:5000/api/v1/auths/ws/test");
-        
+
 
         // 2️⃣ เมื่อเชื่อมต่อสำเร็จ
         ws.onopen = () => {
             console.log("✅ WebSocket Connected!");
             setIsConnected(true);
+            setReadyState(WebSocket.OPEN);
             setMessages(prev => [...prev, "🟢 System: Connected to WebSocket server"]);
         };
 
@@ -46,6 +48,7 @@ const WebSocketTestPage = () => {
         ws.onclose = (event) => {
             console.log("🔌 WebSocket Disconnected", event.code, event.reason);
             setIsConnected(false);
+            setReadyState(WebSocket.CLOSED);
             setMessages(prev => [...prev, "🔴 System: Disconnected from WebSocket server"]);
         };
 
@@ -202,10 +205,10 @@ const WebSocketTestPage = () => {
                 <div className="bg-slate-800/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center">
                     <p className="text-slate-400 text-sm">Connection State</p>
                     <p className="text-white text-2xl font-bold mt-2">
-                        {wsRef.current?.readyState === 0 ? 'CONNECTING' :
-                            wsRef.current?.readyState === 1 ? 'OPEN' :
-                                wsRef.current?.readyState === 2 ? 'CLOSING' :
-                                    wsRef.current?.readyState === 3 ? 'CLOSED' : 'UNKNOWN'}
+                        {readyState === 0 ? 'CONNECTING' :
+                            readyState === 1 ? 'OPEN' :
+                                readyState === 2 ? 'CLOSING' :
+                                    readyState === 3 ? 'CLOSED' : 'UNKNOWN'}
                     </p>
                 </div>
 

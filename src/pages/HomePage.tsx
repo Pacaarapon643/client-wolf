@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from "../context/useAuth"
 import { motion } from "framer-motion";
 
 const HomePage = () => {

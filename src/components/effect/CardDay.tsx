@@ -1,9 +1,16 @@
 import { motion } from 'framer-motion'
 
-
-
+const SPARKLES = Array.from({ length: 20 }, () => ({
+    width: Math.random() * 4 + 2 + 'px',
+    height: Math.random() * 4 + 2 + 'px',
+    top: Math.random() * 100 + '%',
+    left: Math.random() * 100 + '%',
+    duration: 2 + Math.random() * 3,
+    delay: Math.random() * 2,
+}));
 
 const CardDay = () => {
+
     return (
         <div>
             {/* Backdrop Blur */}
@@ -47,24 +54,24 @@ const CardDay = () => {
 
                     {/* Sparkles Background Pattern */}
                     <div className="absolute inset-0 opacity-40">
-                        {[...Array(20)].map((_, i) => (
+                        {SPARKLES.map((s, i) => (
                             <motion.div
                                 key={i}
                                 className="absolute bg-amber-400 rounded-full"
                                 style={{
-                                    width: Math.random() * 4 + 2 + 'px',
-                                    height: Math.random() * 4 + 2 + 'px',
-                                    top: Math.random() * 100 + '%',
-                                    left: Math.random() * 100 + '%',
+                                    width: s.width,
+                                    height: s.height,
+                                    top: s.top,
+                                    left: s.left,
                                 }}
                                 animate={{
                                     opacity: [0.3, 1, 0.3],
                                     scale: [1, 1.5, 1]
                                 }}
                                 transition={{
-                                    duration: 2 + Math.random() * 3,
+                                    duration: s.duration,
                                     repeat: Infinity,
-                                    delay: Math.random() * 2
+                                    delay: s.delay
                                 }}
                             />
                         ))}

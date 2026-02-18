@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import VotingTimer from "../components/effect/VotingTimer";
 import { useParams, useSearchParams } from "react-router";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { GetGamePlayer, GetRole } from "../api/game";
 import { GetRoomById, } from "../api/room";
 import type { ChatMessage, GetGamePlayerResponse } from "../types/game";
@@ -44,15 +44,66 @@ const GamePlayPage = () => {
     }, [phase, night, day, vote, role, status, index]);
 
 
-    useEffect(() => {
-        if (!user || !room_id) {
-            return
+    const getRole = async () => {
+        try {
+            const res = await GetRole(room_id ?? "", user?.id ?? "")
+            setRole(res.data)
+        } catch (error: unknown) {
+            alert(String(error))
         }
+    }
 
-        // Fetch role if we don't have it yet
-        if (!role) {
-            getRole();
-            return;
+    const getGamePlayer = async () => {
+        try {
+            const res = await GetGamePlayer(game_id, role ?? "")
+            console.log(res);
+            setPlayer(res)
+        } catch (error: unknown) {
+            alert(String(error))
+        }
+    }
+
+    const getStatusRoom = async () => {
+        try {
+            const res = await GetRoomById(room_id ?? "")
+            console.log(res);
+            setStatus(res.data.room_status)
+        } catch (error: unknown) {
+            alert(String(error))
+        }
+    }
+
+    const handleStartGame = () => {
+        if (!wsRef.current) return
+        const chatData = {
+            type: "start_game",
+            room_id: room_id
+        }
+        wsRef.current.send(JSON.stringify(chatData))
+    }
+
+    const handleSummary = () => {
+        const currentPhase = stateRef.current.phase;
+        if (!wsRef.current) return
+        const summaryData = {
+            type: "summary",
+            content: currentPhase,
+            room_id: room_id
+        }
+        wsRef.current.send(JSON.stringify(summaryData))
+    }
+
+    // Effect 1: fetch role when user/room_id are ready but role is not yet set
+    useEffect(() => {
+        if (!user || !room_id || role) return;
+        getRole();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, room_id]);
+
+    // Effect 2: set up WebSocket once role is available
+    useEffect(() => {
+        if (!user || !room_id || !role) {
+            return
         }
 
         getGamePlayer()
@@ -163,6 +214,7 @@ const GamePlayPage = () => {
             ws.close()
         }
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, room_id, role]);
 
 
@@ -170,36 +222,6 @@ const GamePlayPage = () => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }, [chatMessages])
 
-
-    const getRole = async () => {
-        try {
-            const res = await GetRole(room_id!, user?.id!)
-            setRole(res.data)
-        } catch (error) {
-            alert(error)
-        }
-    }
-
-    const getGamePlayer = async () => {
-        try {
-            const res = await GetGamePlayer(game_id, role!)
-            console.log(res);
-
-            setPlayer(res)
-        } catch (error) {
-            alert(error)
-        }
-    }
-
-    const getStatusRoom = async () => {
-        try {
-            const res = await GetRoomById(room_id!)
-            console.log(res);
-            setStatus(res.data.room_status)
-        } catch (error) {
-            alert(error)
-        }
-    }
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault()
@@ -215,21 +237,9 @@ const GamePlayPage = () => {
         setMessageInput("")
     }
 
-    const handleStartGame = () => {
-        if (!wsRef.current) return
-        const chatData = {
-            type: "start_game",
-            room_id: room_id
-        }
-
-        wsRef.current.send(JSON.stringify(chatData))
-    }
-
     const handleSelectedId = (user_id: string, index: string) => {
-
         setSelectedId(user_id)
         setIndex(index)
-
     }
 
     const handleVote = () => {
@@ -240,21 +250,8 @@ const GamePlayPage = () => {
             content: currentIndex,
             room_id: room_id
         }
-
         console.log("โหวตแล้วๆๆๆ", currentIndex);
         wsRef.current.send(JSON.stringify(voteData))
-    }
-
-    const handleSummary = () => {
-        const currentPhase = stateRef.current.phase;
-        if (!wsRef.current) return
-        const summaryData = {
-            type: "summary",
-            content: currentPhase,
-            room_id: room_id
-        }
-
-        wsRef.current.send(JSON.stringify(summaryData))
     }
 
     const handleDisabled = (user_id: string, is_werewolf: boolean, is_dead: boolean): boolean => {

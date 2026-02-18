@@ -2,6 +2,13 @@
 import { cn } from "../../lib/utils";
 import { motion } from "motion/react";
 
+const MAX_METEORS = 20;
+const METEOR_DATA = Array.from({ length: MAX_METEORS }, (_, idx) => ({
+  positionPercent: (idx / MAX_METEORS) * 100,
+  animationDelay: Math.random() * 5 + "s",
+  animationDuration: Math.floor(Math.random() * (10 - 5) + 5) + "s",
+}));
+
 export const Meteors = ({
   number,
   className,
@@ -9,7 +16,8 @@ export const Meteors = ({
   number?: number;
   className?: string;
 }) => {
-  const meteors = new Array(number || 20).fill(true);
+  const meteors = METEOR_DATA.slice(0, number || MAX_METEORS);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -17,28 +25,22 @@ export const Meteors = ({
       transition={{ duration: 0.5 }}
       className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none"
     >
-      {meteors.map((_, idx) => {
-        const meteorCount = number || 20;
-        // Calculate position to evenly distribute meteors across full screen width
-        const positionPercent = (idx / meteorCount) * 100; // Spread across 0-100%
-
-        return (
-          <span
-            key={"meteor" + idx}
-            className={cn(
-              "animate-meteor-effect absolute h-0.5 w-0.5 rotate-[45deg] rounded-[9999px] bg-slate-500 shadow-[0_0_0_1px_#ffffff10]",
-              "before:absolute before:top-1/2 before:h-[1px] before:w-[50px] before:-translate-y-[50%] before:transform before:bg-gradient-to-r before:from-[#64748b] before:to-transparent before:content-['']",
-              className,
-            )}
-            style={{
-              top: "-40px", // Start above the container
-              left: positionPercent + "%",
-              animationDelay: Math.random() * 5 + "s", // Random delay between 0-5s
-              animationDuration: Math.floor(Math.random() * (10 - 5) + 5) + "s", // Keep some randomness in duration
-            }}
-          ></span>
-        );
-      })}
+      {meteors.map((m, idx) => (
+        <span
+          key={"meteor" + idx}
+          className={cn(
+            "animate-meteor-effect absolute h-0.5 w-0.5 rotate-[45deg] rounded-[9999px] bg-slate-500 shadow-[0_0_0_1px_#ffffff10]",
+            "before:absolute before:top-1/2 before:h-[1px] before:w-[50px] before:-translate-y-[50%] before:transform before:bg-gradient-to-r before:from-[#64748b] before:to-transparent before:content-['']",
+            className,
+          )}
+          style={{
+            top: "-40px",
+            left: m.positionPercent + "%",
+            animationDelay: m.animationDelay,
+            animationDuration: m.animationDuration,
+          }}
+        ></span>
+      ))}
     </motion.div>
   );
 };

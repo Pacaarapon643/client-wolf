@@ -8,7 +8,7 @@ import { joinRoomSchema, type JoinRoomInput, type RoomInput } from "../schemas/r
 import { roomSchema } from "../schemas/room";
 import { createRoom, GetCountRoom, getRoom, GetRoomById } from "../api/room";
 import type { Room } from "../types/room";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { getCountUser } from "../api/user";
 import type { WsMessage } from "../types/ws";
 import RulesGame from "../components/RulesGame/RulesGame";
@@ -70,6 +70,33 @@ const GameLobbyPage = () => {
     resolver: zodResolver(joinRoomSchema)
   })
 
+  const OnGetRoom = async () => {
+    try {
+      const response = await getRoom();
+      setRoom(response.data);
+    } catch (error: unknown) {
+      alert((error as Error).message);
+    }
+  }
+
+  const OnCountRoom = async () => {
+    try {
+      const response = await GetCountRoom();
+      setCountRoom(response.data);
+    } catch (error: unknown) {
+      alert((error as Error).message);
+    }
+  }
+
+  const OnCountUser = async () => {
+    try {
+      const response = await getCountUser();
+      setCountUser(response.data);
+    } catch (error: unknown) {
+      alert((error as Error).message);
+    }
+  }
+
   useEffect(() => {
 
     OnGetRoom();
@@ -119,6 +146,7 @@ const GameLobbyPage = () => {
 
 
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const onSubmitRoom = async (data: RoomInput) => {
@@ -133,38 +161,10 @@ const GameLobbyPage = () => {
         }
       })
 
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error: unknown) {
+      alert((error as Error).message);
     }
 
-  }
-
-
-  const OnGetRoom = async () => {
-    try {
-      const response = await getRoom();
-      setRoom(response.data);
-    } catch (error: any) {
-      alert(error.message);
-    }
-  }
-
-  const OnCountRoom = async () => {
-    try {
-      const response = await GetCountRoom();
-      setCountRoom(response.data);
-    } catch (error: any) {
-      alert(error.message);
-    }
-  }
-
-  const OnCountUser = async () => {
-    try {
-      const response = await getCountUser();
-      setCountUser(response.data);
-    } catch (error: any) {
-      alert(error.message);
-    }
   }
 
   const openPopup = (title: string) => {
@@ -197,8 +197,8 @@ const GameLobbyPage = () => {
           max_room: response.data.total_player,
         }
       });
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error: unknown) {
+      alert((error as Error).message);
     }
 
 
