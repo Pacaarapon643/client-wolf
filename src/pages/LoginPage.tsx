@@ -31,11 +31,12 @@ const LoginPage = () => {
                 email: response.data.email,
             });
             navigate('/lobby')
-        } catch (error: any) {
-            if (error.message === "record not found") {
+        } catch (error: unknown) {
+            const message = (error as Error).message;
+            if (message === "record not found") {
                 alert("ไม่พบผู้ใช้งาน");
             } else
-                alert(error.message);
+                alert(message);
         }
 
     }

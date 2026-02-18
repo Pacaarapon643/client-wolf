@@ -22,9 +22,10 @@ const RegisterPage = () => {
             console.log(response);
             alert("สมัครสมาชิกสำเร็จ! 🐺");
             navigate('/login');
-        } catch (err: any) {
-            console.log(err.message);
-            alert(err.message);
+        } catch (err: unknown) {
+            const message = (err as Error).message;
+            console.log(message);
+            alert(message);
         }
     };
 

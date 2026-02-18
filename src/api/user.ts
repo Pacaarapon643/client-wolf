@@ -7,8 +7,8 @@ export const getCountUser = async (): Promise<GetCountUserResponse> => {
         const response = await api.get(`/users/count`)
         return response.data
 
-    } catch (error: any) {
-        const backendError = error.response?.data;
+    } catch (error: unknown) {
+        const backendError = (error as { response?: { data?: { error?: string; message?: string } } }).response?.data;
         throw new Error(backendError?.error || backendError?.message || "ดึงข้อมูลไม่สำเร็จ");
     }
 }
