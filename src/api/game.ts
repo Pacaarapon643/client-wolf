@@ -13,8 +13,8 @@ export const GetRole = async (room_id: string, user_id: string): Promise<BaseRes
 
         return response.data;
 
-    } catch (error: any) {
-        const backendError = error.response?.data;
+    } catch (error: unknown) {
+        const backendError = (error as { response?: { data?: { error?: string; message?: string } } }).response?.data;
         throw new Error(backendError?.error || backendError?.message || "ดึงข้อมูลไม่สำเร็จ");
     }
 }
@@ -29,8 +29,8 @@ export const GetGamePlayer = async (game_id: string, role: string): Promise<GetG
         })
         return response.data;
 
-    } catch (error: any) {
-        const backendError = error.response?.data;
+    } catch (error: unknown) {
+        const backendError = (error as { response?: { data?: { error?: string; message?: string } } }).response?.data;
         throw new Error(backendError?.error || backendError?.message || "ดึงข้อมูลไม่สำเร็จ");
     }
 }

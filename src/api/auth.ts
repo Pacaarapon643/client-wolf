@@ -9,8 +9,8 @@ export const RegisterUser = async (data: RegisterInput) => {
             data
         )
         return response.data;
-    } catch (error: any) {
-        const backendError = error.response?.data;
+    } catch (error: unknown) {
+        const backendError = (error as { response?: { data?: { error?: string; message?: string } } }).response?.data;
         throw new Error(backendError?.error || backendError?.message || "เกิดข้อผิดพลาด");
     }
 }
@@ -23,8 +23,8 @@ export const LoginUser = async (data: LoginInput): Promise<GetAuthResponse> => {
         console.log(response);
 
         return response.data;
-    } catch (error: any) {
-        const backendError = error.response?.data;
+    } catch (error: unknown) {
+        const backendError = (error as { response?: { data?: { error?: string; message?: string } } }).response?.data;
         throw new Error(backendError?.error || backendError?.message || "เข้าสู่ระบบไม่สำเร็จ");
     }
 }
