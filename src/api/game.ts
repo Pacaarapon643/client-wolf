@@ -19,14 +19,14 @@ export const GetRole = async (room_id: string, user_id: string): Promise<BaseRes
     }
 }
 
-export const GetGamePlayer = async (game_id: string): Promise<GetGamePlayerResponse> => {
+export const GetGamePlayer = async (game_id: string, role: string): Promise<GetGamePlayerResponse> => {
     try {
         const response = await api.get(`/games/game`, {
             params: {
-                game_id: game_id && "51044daa-17a6-4618-9c96-90ba01970e71",
+                game_id: game_id,
+                role: role
             }
         })
-
         return response.data;
 
     } catch (error: any) {

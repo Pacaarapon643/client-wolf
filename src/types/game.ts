@@ -11,6 +11,9 @@ interface Player {
     user_id: string;
     slot_index: number;
     is_dead: boolean;
+    img: string;
+    is_join: boolean;
+    is_werewolf: boolean;
 }
 
 export type GetGamePlayerResponse = BaseResponse<Player[]>;

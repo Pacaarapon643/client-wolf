@@ -4,8 +4,7 @@ import VotingTimer from "../components/effect/VotingTimer";
 import { useParams, useSearchParams } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { GetGamePlayer, GetRole } from "../api/game";
-import type { GetRoomMemberResponse } from "../types/room";
-import { GetRoomMember } from "../api/room";
+import { GetRoomById, } from "../api/room";
 import type { ChatMessage, GetGamePlayerResponse } from "../types/game";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShootingStars } from "@/components/ui/shooting-stars";
@@ -18,6 +17,7 @@ import CardDay from "@/components/effect/CardDay";
 const GamePlayPage = () => {
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
     const [messageInput, setMessageInput] = useState<string>("")
+    const [status, setStatus] = useState<string>("")
     const [showCardNight, setShowCardNight] = useState<boolean>(false)
     const [showCardDay, setShowCardDay] = useState<boolean>(false)
     const [time, setTime] = useState<number>(0);
@@ -32,22 +32,31 @@ const GamePlayPage = () => {
     const [role, setRole] = useState<string | null>(null)
     const wsRef = useRef<WebSocket | null>(null);
     const [phase, setPhase] = useState<string>("wait")
-    const images = [
-        "/bg-day.png",
-        "/Gemini_Generated_Image_x8sksgx8sksgx8sk.png",
-        "/download2026020420328.png"
-    ]
     const [night, setNight] = useState<boolean>(false)
     const [day, setDay] = useState<boolean>(false)
-    const [indeximg] = useState(0)
+    const [selectedId, setSelectedId] = useState<string>("")
+    const [index, setIndex] = useState<string>("")
+
+    // Use a ref to always have access to the latest state inside async/callback handlers
+    const stateRef = useRef({ phase, night, day, vote, role, status, index });
+    useEffect(() => {
+        stateRef.current = { phase, night, day, vote, role, status, index };
+    }, [phase, night, day, vote, role, status, index]);
+
 
     useEffect(() => {
-        if (!user) {
+        if (!user || !room_id) {
             return
         }
 
-        getRole()
+        // Fetch role if we don't have it yet
+        if (!role) {
+            getRole();
+            return;
+        }
+
         getGamePlayer()
+        getStatusRoom()
 
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
         const ws = new WebSocket(`${protocol}//${window.location.host}/api/games/ws-game`)
@@ -61,6 +70,7 @@ const GamePlayPage = () => {
                 room_id: room_id,
                 user_id: user?.id,
                 username: user?.username,
+                game_id: game_id
             }
 
             ws.send(JSON.stringify(joinMessage));
@@ -68,8 +78,25 @@ const GamePlayPage = () => {
         }
 
         ws.onmessage = (event) => {
+            const currentPhase = stateRef.current.phase;
+            console.log("Current Phase (from ref):", currentPhase);
+
             const data = JSON.parse(event.data)
             console.log(data);
+
+            if (data.type === "summary") {
+                console.log("summary");
+                setSelectedId(" ")
+                handleSummary()
+            }
+
+            if (data.type === "load_game") {
+                getGamePlayer()
+            }
+
+            if (data.type === "status_room") {
+                getStatusRoom()
+            }
 
             if (data.type === "chat") {
                 setChatMessages(prev => [...prev, {
@@ -123,8 +150,12 @@ const GamePlayPage = () => {
                     setPhase(data.phase)
                     setTime(data.remaining)
                 }
+
+
             }
         }
+
+
 
 
 
@@ -132,116 +163,17 @@ const GamePlayPage = () => {
             ws.close()
         }
 
-    }, [user, room_id]);
+    }, [user, room_id, role]);
 
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }, [chatMessages])
 
-    // นับเวลาเปิดการ์ดกลางคืน
-    // useEffect(() => {
-    //     let timer: ReturnType<typeof setInterval> | undefined;
-
-    //     if (showCardNight && secondsNight > 0) {
-    //         timer = setInterval(() => {
-    //             setSecondsNight((prev) => {
-    //                 if (prev <= 1) {
-    //                     setShowCardNight(false);
-    //                     return 0;
-    //                 }
-    //                 return prev - 1;
-    //             });
-    //         }, 1000);
-    //     }
-
-    //     return () => clearInterval(timer);
-    // }, [showCardNight]);
-
-    // นับเวลาเปิดการ์ดกลางวัน
-    // useEffect(() => {
-    //     let timer: ReturnType<typeof setInterval> | undefined;
-
-    //     if (showCardDay && secondsDay > 0) {
-    //         timer = setInterval(() => {
-    //             setSecondsDay((prev) => {
-    //                 if (prev <= 1) {
-    //                     setShowCardDay(false);
-    //                     return 0;
-    //                 }
-    //                 return prev - 1;
-    //             });
-    //         }, 1000);
-    //     }
-
-    //     return () => clearInterval(timer);
-    // }, [showCardDay]);
-
-    // นับเวลากลางคืน
-    // useEffect(() => {
-    //     let timer: ReturnType<typeof setInterval> | undefined;
-    //     if (night && timeNight > 0) {
-    //         timer = setInterval(() => {
-    //             setTimeNight((prev) => {
-    //                 if (prev <= 1) {
-    //                     setNight(false)
-    //                     setDay(true)
-    //                     setShowCardDay(true)
-    //                     setTimeDay(60)
-    //                     setSecondsDay(2) // Reset for next day cycle
-    //                     return 0
-    //                 }
-    //                 return prev - 1
-    //             })
-    //         }, 1000);
-    //     }
-    //     return () => clearInterval(timer)
-    // }, [night])
-
-    // นับเวลาประชุม
-    // useEffect(() => {
-    //     let timer: ReturnType<typeof setInterval> | undefined;
-    //     if (day && timeDay > 0) {
-    //         timer = setInterval(() => {
-    //             setTimeDay((prev) => {
-    //                 if (prev <= 1) {
-    //                     setVote(true)
-    //                     setTimeVote(30)
-    //                     return 0
-    //                 }
-    //                 return prev - 1
-    //             })
-    //         }, 1000);
-    //     }
-    //     return () => clearInterval(timer)
-    // }, [day, vote])
-
-    // นับเวลาโหวต
-    // useEffect(() => {
-    //     let timer: ReturnType<typeof setInterval> | undefined;
-    //     if (vote && timeVote > 0) {
-    //         timer = setInterval(() => {
-    //             setTimeVote((prev) => {
-    //                 if (prev <= 1) {
-    //                     setVote(false)
-    //                     setDay(false)
-    //                     setTimeNight(30)
-    //                     setNight(true)
-    //                     setShowCardNight(true)
-    //                     setSecondsNight(2) // Reset for next day cycle
-    //                     return 0
-    //                 }
-    //                 return prev - 1
-    //             })
-    //         }, 1000);
-    //     }
-    //     return () => clearInterval(timer)
-    // }, [vote])
 
     const getRole = async () => {
         try {
             const res = await GetRole(room_id!, user?.id!)
-
             setRole(res.data)
         } catch (error) {
             alert(error)
@@ -250,8 +182,20 @@ const GamePlayPage = () => {
 
     const getGamePlayer = async () => {
         try {
-            const res = await GetGamePlayer(game_id)
+            const res = await GetGamePlayer(game_id, role!)
+            console.log(res);
+
             setPlayer(res)
+        } catch (error) {
+            alert(error)
+        }
+    }
+
+    const getStatusRoom = async () => {
+        try {
+            const res = await GetRoomById(room_id!)
+            console.log(res);
+            setStatus(res.data.room_status)
         } catch (error) {
             alert(error)
         }
@@ -279,6 +223,61 @@ const GamePlayPage = () => {
         }
 
         wsRef.current.send(JSON.stringify(chatData))
+    }
+
+    const handleSelectedId = (user_id: string, index: string) => {
+
+        setSelectedId(user_id)
+        setIndex(index)
+
+    }
+
+    const handleVote = () => {
+        const currentIndex = stateRef.current.index;
+        if (!wsRef.current || !currentIndex) return
+        const voteData = {
+            type: "vote",
+            content: currentIndex,
+            room_id: room_id
+        }
+
+        console.log("โหวตแล้วๆๆๆ", currentIndex);
+        wsRef.current.send(JSON.stringify(voteData))
+    }
+
+    const handleSummary = () => {
+        const currentPhase = stateRef.current.phase;
+        if (!wsRef.current) return
+        const summaryData = {
+            type: "summary",
+            content: currentPhase,
+            room_id: room_id
+        }
+
+        wsRef.current.send(JSON.stringify(summaryData))
+    }
+
+    const handleDisabled = (user_id: string, is_werewolf: boolean, is_dead: boolean): boolean => {
+
+        //ถ้าตาย
+        if (is_dead) {
+            return true
+        }
+
+        // เงื่อนไขถ้าเป็นหมาป่า
+        if (!is_werewolf && role === "werewolf" && user_id !== user?.id && night) {
+            return false
+        }
+
+        // หยังรู้
+        if (role === "seer" && night && user_id !== user?.id) {
+            return false
+        }
+
+
+
+
+        return true
     }
 
 
@@ -356,21 +355,46 @@ const GamePlayPage = () => {
                     <div className="h-full border border-white/10 rounded-3xl bg-blue-950/5 backdrop-blur-xl shadow-2xl shadow-black/40 overflow-hidden relative group flex-1">
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-indigo-500/10 opacity-40"></div>
                         <div className="absolute inset-0 border-[2px] border-white/5 rounded-3xl pointer-events-none"></div>
-                        <div className="grid grid-cols-3 gap-3 p-4 h-[80vh]">
-                            {player?.data?.map((_, index) => (
-                                <motion.button
+                        <div className="grid grid-cols-3 gap-10 p-4 h-[80vh]">
+                            {player?.data?.map((item, index) => (
+                                (item.is_join ? <motion.button
                                     whileTap={{ scale: 0.9 }}
+                                    disabled={handleDisabled(item.user_id, item.is_werewolf, item.is_dead)}
                                     whileHover={{ scale: 1.1 }}
-                                    className="w-full h-full rounded-2xl bg-blue-950/10 backdrop-blur-xl shadow-2xl shadow-black/40"
+                                    onClick={() => handleSelectedId(item.user_id, index.toString())}
+                                    className={`w-full h-full rounded-3xl backdrop-blur-xl shadow-2xl shadow-black/40 
+                                        ${selectedId === item.user_id ? "border-5 border-red-500" : ""}
+                                        ${item.is_dead && "opacity-50"}`}
                                 >
-                                    <div className="text-2xl w-full h-full flex items-center justify-center">
-
+                                    <div className="relative w-full h-full">
+                                        <img
+                                            src={`/${item.img}`}
+                                            alt="รูปคน"
+                                            className="absolute inset-0 w-full h-full object-cover rounded-2xl"
+                                        />
+                                        <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent rounded-b-2xl">
+                                            <p className={`text-center  font-medium ${item.is_werewolf ? "text-yellow-500 text-md" : "text-white text-sm"}`}>
+                                                {item.user_name || `Player ${index + 1}`}
+                                            </p>
+                                        </div>
                                     </div>
-                                </motion.button>
+                                </motion.button> : <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    whileHover={{ scale: 1.05 }}
+                                    className="w-full h-full rounded-2xl bg-white/5"
+                                >
+                                    <div className="relative w-full h-full flex items-center justify-center">
+                                        <p className="text-white text-sm font-medium">
+                                            รอผู้เล่น...
+                                        </p>
+                                    </div>
+                                </motion.button>)
+
                             ))}
                         </div>
                     </div>
-                    <div className="h-[100px] border border-white/10 flex justify-between items-center p-4">
+                    {/* แถบข้างล่าง */}
+                    {status == "start" ? (<div className="h-[100px] border border-white/10 flex justify-between items-center p-4">
                         <div className="flex gap-2">
                             <div className=" w-[50px] h-[50px] rounded-xl">
                                 <div className="text-2xl w-full h-full flex items-center justify-center">
@@ -390,6 +414,7 @@ const GamePlayPage = () => {
                             <motion.button
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
+                                onClick={handleVote}
                                 whileHover={{
                                     scale: 1.05,
                                     // rotate: 2, 
@@ -418,7 +443,14 @@ const GamePlayPage = () => {
 
                         </div>
 
-                    </div>
+                    </div>) : (
+                        <div className="h-[100px] flex justify-center items-center p-4">
+                            <p className="text-white text-xl">จะสุ่ม role เมื่อเกมเริ่มขึ้น...</p>
+                        </div>
+                    )}
+
+
+
                 </div>
 
 
