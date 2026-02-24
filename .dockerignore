@@ -1,0 +1,37 @@
+# Dependencies (re-installed inside Docker)
+node_modules/
+
+# Build output (built inside Docker)
+dist/
+dist-ssr/
+build/
+
+# Dev environment files
+.env.local
+.env.*.local
+
+# Editor / OS clutter
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Test / coverage
+coverage/
+*.tsbuildinfo
+
+# Docker files themselves (avoid recursive copy)
+Dockerfile
+.dockerignore
