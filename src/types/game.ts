@@ -17,3 +17,10 @@ interface Player {
 }
 
 export type GetGamePlayerResponse = BaseResponse<Player[]>;
+
+export interface GameEvent {
+    type: string;
+    event_type: string; // "death", "saved", "night", "execute", "info"
+    message: string;
+    night_count: number;
+}

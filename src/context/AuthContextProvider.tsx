@@ -1,5 +1,20 @@
-import { useState, type ReactNode } from "react";
-import { AuthContext, type User } from "./authContext";
+import { useState, createContext, type ReactNode } from "react";
+
+// Type ของ User
+export interface User {
+    id: string;
+    username: string;
+    email: string;
+}
+
+export interface AuthContextType {
+    user: User | null;
+    isLoggedIn: boolean;
+    login: (userData: User) => void;
+    logout: () => void;
+}
+
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 function loadUserFromStorage(): User | null {
     try {

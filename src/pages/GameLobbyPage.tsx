@@ -74,6 +74,9 @@ const GameLobbyPage = () => {
     try {
       const response = await getRoom();
       setRoom(response.data);
+      // รีเฟรชตัวเลขจำนวนห้องและผู้เล่นด้วย
+      OnCountRoom();
+      OnCountUser();
     } catch (error: unknown) {
       alert((error as Error).message);
     }
@@ -424,8 +427,7 @@ const GameLobbyPage = () => {
           <RulesGame onClose={closeRules} />
         )}
       </AnimatePresence>
-      <div className="w-full max-w-6xl mx-auto flex justify-between">
-
+      <div className="w-full max-w-6xl mx-auto flex justify-between relative z-20">
         <h3 className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent text-3xl sm:text-5xl font-bold ml-2 sm:ml-0">
           ห้องที่เปิด
         </h3>

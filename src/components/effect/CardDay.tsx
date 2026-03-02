@@ -135,25 +135,7 @@ const CardDay = () => {
                         >
                             ทุกคนเปิดตาได้แล้ว ชาวบ้านจะร่วมกันหาตัวมนุษย์หมาป่า...
                         </motion.p>
-
-                        {/* Animated Close Button */}
-                        <motion.button
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.7 }}
-                            whileHover={{
-                                scale: 1.05,
-                                boxShadow: "0 0 20px rgba(251, 191, 36, 0.6)"
-                            }}
-                            whileTap={{ scale: 0.95 }}
-                            className="mt-4 px-8 py-3 bg-gradient-to-r from-amber-500 to-orange-500 
-                                     hover:from-amber-400 hover:to-orange-400
-                                     text-white font-semibold rounded-xl 
-                                     border border-amber-300/50 shadow-lg shadow-amber-500/40
-                                     transition-all duration-300"
-                        >
-                            เข้าใจแล้ว
-                        </motion.button>
+                        
                     </div>
                 </div>
             </motion.div>

@@ -128,25 +128,6 @@ const CardNight = () => {
                             ทุกคนกรุณาหลับตา มนุษย์หมาป่าจะเลือกเหยื่อของพวกเขา...
                         </motion.p>
 
-                        {/* Animated Close Button */}
-                        <motion.button
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.7 }}
-                            whileHover={{
-                                scale: 1.05,
-                                boxShadow: "0 0 20px rgba(99, 102, 241, 0.5)"
-                            }}
-                            whileTap={{ scale: 0.95 }}
-
-                            className="mt-4 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 
-                                     hover:from-indigo-500 hover:to-purple-500
-                                     text-white font-semibold rounded-xl 
-                                     border border-indigo-400/30 shadow-lg shadow-indigo-900/50
-                                     transition-all duration-300"
-                        >
-                            เข้าใจแล้ว
-                        </motion.button>
                     </div>
                 </div>
             </motion.div>
